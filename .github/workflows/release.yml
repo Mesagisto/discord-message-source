@@ -1,0 +1,114 @@
+name: release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  linux-build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: recursive
+    - name: Resume cache
+      uses: actions/cache@v2
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+          target
+        key: ${{ runner.os }}-release-${{ hashFiles('**/Cargo.toml') }}
+        restore-keys: |
+          ${{ runner.os }}-release
+    - name: Install Rust toolchain
+      uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: nightly
+        override: true
+    - name: Install musl and opus
+      run: |
+        sudo apt-get install -y libopus-dev
+        sudo apt install -y musl-tools
+        sudo ln -s /usr/include/x86_64-linux-gnu/asm /usr/include/x86_64-linux-musl/asm
+        sudo ln -s /usr/include/asm-generic /usr/include/x86_64-linux-musl/asm-generic
+        sudo ln -s /usr/include/linux /usr/include/x86_64-linux-musl/linux
+    - name: Build
+      run: |
+        rustup target add x86_64-unknown-linux-musl
+        cargo build --target x86_64-unknown-linux-musl --release
+        mv target/x86_64-unknown-linux-musl/release/discord-mesaga-fonto target/x86_64-unknown-linux-musl/release/dmf-amd64-linux
+    - name: Compress binaries
+      uses: svenstaro/upx-action@v2
+      with:
+        file: target/x86_64-unknown-linux-musl/release/dmf-amd64-linux
+    - name: Upload bin
+      uses: actions/upload-artifact@v2
+      with:
+        name: amd64-linux
+        path: target/x86_64-unknown-linux-musl/release/dmf-amd64-linux
+
+  macos-build:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: recursive
+    - name: Resume cache
+      uses: actions/cache@v2
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+          target
+        key: ${{ runner.os }}-release-${{ hashFiles('**/Cargo.toml') }}
+        restore-keys: |
+          ${{ runner.os }}-release
+
+    - name: Install Rust toolchain
+      uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: nightly
+        override: true
+    - name: Build
+      run: |
+        cargo build --release
+        mv target/release/discord-mesaga-fonto target/release/dmf-amd64-macos
+    - name: Compress binaries
+      uses: svenstaro/upx-action@v2
+      with:
+        file: target/release/dmf-amd64-macos
+    - name: Upload bin
+      uses: actions/upload-artifact@v2
+      with:
+        name: amd64-macos
+        path: target/release/dmf-amd64-macos
+
+  release:
+    name: Release
+    needs: [linux-build, macos-build]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Download linux-bin
+        uses: actions/download-artifact@v2
+        with:
+          name: amd64-linux
+          path: ./packages
+      - name: Download macos-bin
+        uses: actions/download-artifact@v2
+        with:
+          name: amd64-macos
+          path: ./packages
+      - name: Github release
+        uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          prerelease: true
+          files: |
+            packages/*
+            LICENSE
+
