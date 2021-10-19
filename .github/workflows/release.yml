@@ -6,7 +6,7 @@ on:
       - "v*"
 
 env:
-  SHORT_NAME: dmf
+  SHORT_NAME: dms
 
 jobs:
   build-amd64:
