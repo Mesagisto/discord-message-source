@@ -1,14 +1,14 @@
-use std::collections::HashSet;
 use crate::commands::*;
 use serenity::{
-    client::Context,
-    framework::standard::{
-        help_commands,
-        Args, CommandGroup, CommandResult, HelpOptions,
-        macros::{ group,help}
-    },
-    model::{channel::Message, id::UserId}
+  client::Context,
+  framework::standard::{
+    help_commands,
+    macros::{group, help},
+    Args, CommandGroup, CommandResult, HelpOptions,
+  },
+  model::{channel::Message, id::UserId},
 };
+use std::collections::HashSet;
 
 #[group("**Commands**|**命令列表**")]
 #[description = "Commands of Mesagisto"]
@@ -32,16 +32,13 @@ pub struct Mesagisto;
 #[wrong_channel = "Strike"]
 #[group_prefix = "Prefix commands"]
 pub async fn help(
-    context: &Context,
-    msg: &Message,
-    args: Args,
-    help_options: &'static HelpOptions,
-    groups: &[&'static CommandGroup],
-    owners: HashSet<UserId>
+  context: &Context,
+  msg: &Message,
+  args: Args,
+  help_options: &'static HelpOptions,
+  groups: &[&'static CommandGroup],
+  owners: HashSet<UserId>,
 ) -> CommandResult {
-    let _ =  help_commands::with_embeds(context, msg, args, help_options, groups, owners).await;
-    Ok(())
+  let _ = help_commands::with_embeds(context, msg, args, help_options, groups, owners).await;
+  Ok(())
 }
-
-
-
