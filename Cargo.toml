@@ -24,6 +24,7 @@ url = "2.2.2"
 once_cell = "1.8.0"
 dashmap = { version = "4.0" , features = ["serde"] }
 educe = "0.4.18"
+arcstr = "1.1.1"
 
 # error handling
 thiserror = "1.0"

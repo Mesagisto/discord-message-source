@@ -1,7 +1,11 @@
 #![allow(incomplete_features)]
 #![feature(backtrace,capture_disjoint_fields)]
 
+use std::error::Error;
+
 use crate::bot::BOT_CLIENT;
+use arcstr::ArcStr;
+use mesagisto_client::{OptionExt, cache::CACHE, cipher::CIPHER, db::DB, res::RES, server::SERVER};
 use anyhow::Result;
 use config::CONFIG;
 use serenity::{
@@ -21,7 +25,6 @@ extern crate singleton;
 mod bot;
 mod commands;
 mod config;
-mod data;
 mod event;
 mod framework;
 mod message;
@@ -50,16 +53,30 @@ fn main() {
 }
 
 async fn run() -> Result<(), anyhow::Error> {
+  if !CONFIG.enable {
+    log::warn!("Mesagisto-Bot is not enabled and is about to exit the program.");
+    log::warn!("To enable it, please modify the configuration file.");
+    log::warn!("Mesagisto-Bot未被启用，即将退出程序。");
+    log::warn!("若要启用，请修改配置文件。");
+    return Ok(());
+  }
+  log::info!("Mesagisto-Bot is starting up");
+  log::info!("Mesagisto-Bot正在启动");
+  CACHE.init();
+  if CONFIG.cipher.enable {
+    CIPHER.init(&CONFIG.cipher.key,&CONFIG.cipher.refuse_plain);
+  } else {
+    CIPHER.deinit();
+  }
+  DB.init(ArcStr::from("dc").some());
+  RES.init().await;
+  // RES.resolve_photo_url(|id_pair| { } todo
+  SERVER.init(&CONFIG.nats.address).await;
   let framework = StandardFramework::new()
     .configure(|c| c.prefix("/"))
     .help(&framework::HELP)
     .group(&framework::MESAGISTO_GROUP)
     .normal_message(message::handler::message_hook);
-
-  if !CONFIG.enabled {
-    log::info!("Mesagisto-Bot is not enabled and is about to exit the program");
-    return Ok(());
-  }
 
   let http = net::build_http().await;
   let mut client = ClientBuilder::new_with_http(http)
@@ -88,8 +105,7 @@ async fn run() -> Result<(), anyhow::Error> {
   });
 
   // start to dispatch events
-  if let Err(why) = client.start().await {
-    error!("Client error: {:?}", why);
-  }
+  // the coroutine will be suspend here until it stops
+  client.start().await.expect("Client error");
   Ok(())
 }
