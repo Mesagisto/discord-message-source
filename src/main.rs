@@ -1,10 +1,8 @@
-use std::sync::Arc;
-
 use anyhow::Result;
 use config::CONFIG;
 use message::init_nc;
-use once_cell::sync::OnceCell;
-use serenity::{CacheAndHttp, client::{ClientBuilder, bridge::gateway::GatewayIntents}, framework::standard::StandardFramework};
+use crate::bot::BOT_CLIENT;
+use serenity::{client::{ClientBuilder, bridge::gateway::GatewayIntents}, framework::standard::StandardFramework};
 
 #[macro_use]
 extern crate log;
@@ -22,6 +20,7 @@ mod message;
 mod data;
 mod event;
 mod framework;
+mod bot;
 
 #[tokio::main]
 async fn main() -> Result<(), anyhow::Error> {
@@ -32,10 +31,6 @@ async fn main() -> Result<(), anyhow::Error> {
         .init();
     run().await?;
     Ok(())
-}
-static BOT_CLIENT:OnceCell<Arc<CacheAndHttp>> = OnceCell::new();
-pub fn get_bot_client() -> Arc<CacheAndHttp> {
-    BOT_CLIENT.get().expect("BOT_CLIENT is not initialized").clone()
 }
 
 async fn run() -> Result<(), anyhow::Error>{
@@ -63,7 +58,7 @@ async fn run() -> Result<(), anyhow::Error>{
             intents
         })
         .await.expect("Err creating client");
-    let _ = BOT_CLIENT.set(client.cache_and_http.clone());
+    BOT_CLIENT.init(client.cache_and_http.clone());
     // a shutdown handle task
     let shard_manager = client.shard_manager.clone();
     tokio::spawn(async move {
