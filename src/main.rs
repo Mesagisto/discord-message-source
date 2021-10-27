@@ -1,3 +1,6 @@
+#![allow(incomplete_features)]
+#![feature(backtrace,capture_disjoint_fields)]
+
 use crate::bot::BOT_CLIENT;
 use anyhow::Result;
 use config::CONFIG;
@@ -25,15 +28,26 @@ mod framework;
 mod message;
 mod net;
 
-#[tokio::main]
-async fn main() -> Result<(), anyhow::Error> {
-  pretty_env_logger::formatted_builder()
-    .write_style(pretty_env_logger::env_logger::WriteStyle::Auto)
-    .filter(Some("discord_mesaga_fonto"), log::LevelFilter::Info)
-    .filter(Some("serenity"), log::LevelFilter::Warn)
+fn main() {
+  std::env::set_var("RUST_BACKTRACE", "1");
+  std::backtrace::Backtrace::force_capture();
+  env_logger::builder()
+    .write_style(env_logger::WriteStyle::Auto)
+    .filter(None, log::LevelFilter::Error)
+    .format_timestamp(None)
+    .filter(Some("discord_message_source"), log::LevelFilter::Trace)
+    .filter(Some("mesagisto_client"), log::LevelFilter::Trace)
+    .filter(Some("serenity"), log::LevelFilter::Info)
     .init();
-  run().await?;
-  Ok(())
+  tokio::runtime::Builder::new_multi_thread()
+  // fixme: how many do we need
+    .worker_threads(5)
+    .enable_all()
+    .build()
+    .unwrap()
+    .block_on(async {
+      run().await.unwrap();
+    });
 }
 
 async fn run() -> Result<(), anyhow::Error> {
