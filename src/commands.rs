@@ -35,10 +35,9 @@ pub async fn set(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult 
     msg.reply(ctx, "<channel> parameter is empty").await?;
   }
   let channel = args.single::<String>().unwrap();
-  let dc_channel_id = msg.channel_id.as_u64().to_string();
   CONFIG
     .target_address_mapper
-    .insert(Arc::new(dc_channel_id), Arc::new(channel));
+    .insert(msg.channel_id.as_u64().clone(), Arc::new(channel));
   msg
     .reply(
       ctx,

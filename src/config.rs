@@ -11,7 +11,7 @@ pub struct Config {
   pub forwarding: ForwardingConfig,
   pub discord: DiscordConfig,
   pub proxy: ProxyConfig,
-  pub target_address_mapper: DashMap<Arc<String>, Arc<String>>,
+  pub target_address_mapper: DashMap<u64, Arc<String>>,
 }
 
 #[basic_derive]

@@ -4,7 +4,6 @@
 use crate::bot::BOT_CLIENT;
 use anyhow::Result;
 use config::CONFIG;
-use message::init_nc;
 use serenity::{
   client::{bridge::gateway::GatewayIntents, ClientBuilder},
   framework::standard::StandardFramework,
@@ -51,12 +50,11 @@ fn main() {
 }
 
 async fn run() -> Result<(), anyhow::Error> {
-  init_nc();
   let framework = StandardFramework::new()
     .configure(|c| c.prefix("/"))
     .help(&framework::HELP)
     .group(&framework::MESAGISTO_GROUP)
-    .normal_message(message::normal_message);
+    .normal_message(message::handler::message_hook);
 
   if !CONFIG.enabled {
     log::info!("Mesagisto-Bot is not enabled and is about to exit the program");
