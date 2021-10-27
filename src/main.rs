@@ -10,6 +10,10 @@ use serenity::{CacheAndHttp, client::{ClientBuilder, bridge::gateway::GatewayInt
 extern crate log;
 #[macro_use]
 extern crate educe;
+#[macro_use]
+extern crate automatic_config;
+#[macro_use]
+extern crate singleton;
 
 mod config;
 mod net;
