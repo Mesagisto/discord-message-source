@@ -66,7 +66,11 @@ async fn run() -> Result<(), anyhow::Error> {
   if CONFIG.cipher.enable {
     CIPHER.init(&CONFIG.cipher.key,&CONFIG.cipher.refuse_plain);
   } else {
-    CIPHER.deinit();
+      None
+    .photo_url_resolver(|id_pair| {
+      async {
+        let dc_file: DcFile = serde_cbor::from_slice(&id_pair.1)?;
+        Ok(dc_file.to_url())
   }
   DB.init(ArcStr::from("dc").some());
   RES.init().await;
