@@ -1,15 +1,14 @@
 use std::convert::TryInto;
 
-use mesagisto_client::{OkExt, OptionExt, db::Db};
-
+use mesagisto_client::{db::Db, OkExt, OptionExt};
 
 pub trait DbExt {
   fn put_msg_id_0(&self, target: &u64, uid: &u64, id: &u64) -> anyhow::Result<()>;
   fn put_msg_id_ir_0(&self, target: &u64, uid: &u64, id: &u64) -> anyhow::Result<()>;
-  fn put_msg_id_1(&self, target: &i64, uid: &Vec<u8>, id: &i32) -> anyhow::Result<()>;
-  fn put_msg_id_ir_1(&self, target: &i64, uid: &Vec<u8>, id: &i32) -> anyhow::Result<()>;
-  fn put_msg_id_2(&self, target: &i64, uid: &i32, id: &Vec<u8>) -> anyhow::Result<()>;
-  fn put_msg_id_ir_2(&self, target: &i64, uid: &i32, id: &Vec<u8>) -> anyhow::Result<()>;
+  fn put_msg_id_1(&self, target: &u64, uid: &Vec<u8>, id: &u64) -> anyhow::Result<()>;
+  fn put_msg_id_ir_1(&self, target: &u64, uid: &Vec<u8>, id: &i32) -> anyhow::Result<()>;
+  fn put_msg_id_2(&self, target: &u64, uid: &i32, id: &Vec<u8>) -> anyhow::Result<()>;
+  fn put_msg_id_ir_2(&self, target: &u64, uid: &u64, id: &Vec<u8>) -> anyhow::Result<()>;
   fn put_msg_id_3(&self, target: &u64, uid: &u64, id: &Vec<u8>) -> anyhow::Result<()>;
   fn put_msg_id_ir_3(&self, target: &u64, uid: &u64, id: &Vec<u8>) -> anyhow::Result<()>;
   fn get_msg_id_1(&self, target: &u64, id: &Vec<u8>) -> anyhow::Result<Option<u64>>;
@@ -36,7 +35,7 @@ impl DbExt for Db {
     )
   }
   #[inline]
-  fn put_msg_id_1(&self, target: &i64, uid: &Vec<u8>, id: &i32) -> anyhow::Result<()> {
+  fn put_msg_id_1(&self, target: &u64, uid: &Vec<u8>, id: &u64) -> anyhow::Result<()> {
     self.put_msg_id(
       target.to_be_bytes().to_vec(),
       uid.clone(),
@@ -45,7 +44,7 @@ impl DbExt for Db {
     )
   }
   #[inline]
-  fn put_msg_id_ir_1(&self, target: &i64, uid: &Vec<u8>, id: &i32) -> anyhow::Result<()> {
+  fn put_msg_id_ir_1(&self, target: &u64, uid: &Vec<u8>, id: &i32) -> anyhow::Result<()> {
     self.put_msg_id(
       target.to_be_bytes().to_vec(),
       uid.clone(),
@@ -54,7 +53,7 @@ impl DbExt for Db {
     )
   }
   #[inline]
-  fn put_msg_id_2(&self, target: &i64, uid: &i32, id: &Vec<u8>) -> anyhow::Result<()> {
+  fn put_msg_id_2(&self, target: &u64, uid: &i32, id: &Vec<u8>) -> anyhow::Result<()> {
     self.put_msg_id(
       target.to_be_bytes().to_vec(),
       uid.to_be_bytes().to_vec(),
@@ -63,7 +62,7 @@ impl DbExt for Db {
     )
   }
   #[inline]
-  fn put_msg_id_ir_2(&self, target: &i64, uid: &i32, id: &Vec<u8>) -> anyhow::Result<()> {
+  fn put_msg_id_ir_2(&self, target: &u64, uid: &u64, id: &Vec<u8>) -> anyhow::Result<()> {
     self.put_msg_id(
       target.to_be_bytes().to_vec(),
       uid.to_be_bytes().to_vec(),
