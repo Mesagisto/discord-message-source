@@ -30,7 +30,9 @@ impl BotClient {
   }
   pub async fn download_file(&self, dc_file: &DcFile) -> anyhow::Result<()> {
     let url = dc_file.to_url();
-    CACHE.file_by_url(&dc_file.1.to_be_bytes().to_vec(), &url.into()).await?;
+    CACHE
+      .file_by_url(&dc_file.1.to_be_bytes().to_vec(), &url.into())
+      .await?;
     Ok(())
   }
 }

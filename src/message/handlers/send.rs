@@ -1,5 +1,5 @@
-use crate::CONFIG;
 use crate::bot::BOT_CLIENT;
+use crate::CONFIG;
 use crate::{bot::DcFile, ext::db::DbExt, ext::res::ResExt};
 use arcstr::ArcStr;
 use mesagisto_client::OptionExt;
@@ -48,7 +48,8 @@ pub async fn answer_common(msg: &Message) -> anyhow::Result<()> {
           RES.put_dc_image_id(attach.id.as_u64(), &dc_file)?;
           BOT_CLIENT.download_file(&dc_file).await?;
           chain.push(MessageType::Image {
-            id: attach.id.as_u64().to_be_bytes().to_vec(),url:None
+            id: attach.id.as_u64().to_be_bytes().to_vec(),
+            url: None,
           });
           ()
         }
@@ -58,10 +59,8 @@ pub async fn answer_common(msg: &Message) -> anyhow::Result<()> {
   }
 
   let reply = match &msg.referenced_message {
-    Some(v) => {
-      v.id.as_u64().to_be_bytes().to_vec().some()
-    }
-    None => None
+    Some(v) => v.id.as_u64().to_be_bytes().to_vec().some(),
+    None => None,
   };
   // msg.attachments.get(0).unwrap().content_type;
   DB.put_msg_id_ir_0(&target, msg.id.as_u64(), msg.id.as_u64())?;
@@ -73,7 +72,12 @@ pub async fn answer_common(msg: &Message) -> anyhow::Result<()> {
   };
   let packet = Packet::from(message.tl())?;
   SERVER
-    .send_and_receive(target.to_be_bytes().to_vec(), address, packet, receive_from_server)
+    .send_and_receive(
+      target.to_be_bytes().to_vec(),
+      address,
+      packet,
+      receive_from_server,
+    )
     .await?;
   Ok(())
 }

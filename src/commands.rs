@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use serenity::{
   client::Context,
   framework::standard::{macros::command, Args, CommandResult},
@@ -26,8 +24,7 @@ pub async fn channel(ctx: &Context, msg: &Message) -> CommandResult {
 
 #[command]
 #[required_permissions("ADMINISTRATOR")]
-#[description = "Set mesagisto-channel for current channel
-为当前频道设置信使频道"]
+#[description = "Set mesagisto-channel for current channel \n为当前频道设置信使频道"]
 #[usage = "<channel>"]
 #[min_args(1)]
 pub async fn set(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
@@ -37,7 +34,7 @@ pub async fn set(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult 
   let channel = args.single::<String>().unwrap();
   CONFIG
     .target_address_mapper
-    .insert(msg.channel_id.as_u64().clone(), Arc::new(channel));
+    .insert(msg.channel_id.as_u64().clone(), channel.into());
   msg
     .reply(
       ctx,

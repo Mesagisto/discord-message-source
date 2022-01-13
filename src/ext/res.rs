@@ -1,5 +1,5 @@
-use mesagisto_client::res::Res;
 use crate::bot::DcFile;
+use mesagisto_client::res::Res;
 
 pub trait ResExt {
   fn put_dc_image_id(&self, uid: &u64, file_id: &DcFile) -> anyhow::Result<()>;

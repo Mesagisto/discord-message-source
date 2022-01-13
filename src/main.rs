@@ -1,17 +1,14 @@
 #![allow(incomplete_features)]
-#![feature(backtrace,capture_disjoint_fields)]
+#![feature(backtrace, capture_disjoint_fields)]
 
-use std::error::Error;
-
-use crate::bot::BOT_CLIENT;
-use arcstr::ArcStr;
-use mesagisto_client::{OptionExt, cache::CACHE, cipher::CIPHER, db::DB, res::RES, server::SERVER};
+use crate::bot::{DcFile, BOT_CLIENT};
 use anyhow::Result;
 use config::CONFIG;
+use mesagisto_client::MesagistoConfig;
 use serenity::{
-  client::{bridge::gateway::GatewayIntents, ClientBuilder},
-  framework::standard::StandardFramework,
+  client::ClientBuilder, framework::standard::StandardFramework, model::gateway::GatewayIntents,
 };
+use smol::future::FutureExt;
 
 #[macro_use]
 extern crate log;
@@ -26,12 +23,12 @@ mod bot;
 mod commands;
 mod config;
 mod event;
+pub mod ext;
 mod framework;
 mod message;
 mod net;
 
 fn main() {
-  std::env::set_var("RUST_BACKTRACE", "1");
   std::backtrace::Backtrace::force_capture();
   env_logger::builder()
     .write_style(env_logger::WriteStyle::Auto)
@@ -39,10 +36,10 @@ fn main() {
     .format_timestamp(None)
     .filter(Some("discord_message_source"), log::LevelFilter::Trace)
     .filter(Some("mesagisto_client"), log::LevelFilter::Trace)
-    .filter(Some("serenity"), log::LevelFilter::Info)
+    .filter(Some("serenity"), log::LevelFilter::Warn)
     .init();
   tokio::runtime::Builder::new_multi_thread()
-  // fixme: how many do we need
+    // fixme: how many do we need
     .worker_threads(5)
     .enable_all()
     .build()
@@ -62,20 +59,29 @@ async fn run() -> Result<(), anyhow::Error> {
   }
   log::info!("Mesagisto-Bot is starting up");
   log::info!("Mesagisto-Bot正在启动");
-  CACHE.init();
-  if CONFIG.cipher.enable {
-    CIPHER.init(&CONFIG.cipher.key,&CONFIG.cipher.refuse_plain);
-  } else {
+
+  MesagistoConfig::builder()
+    .name("dc")
+    .cipher_enable(CONFIG.cipher.enable)
+    .cipher_key(CONFIG.cipher.key.clone())
+    .cipher_refuse_plain(CONFIG.cipher.refuse_plain)
+    .nats_address(CONFIG.nats.address.clone())
+    .proxy(if CONFIG.proxy.enable_for_mesagisto {
+      Some(CONFIG.proxy.address.clone())
+    } else {
       None
+    })
     .photo_url_resolver(|id_pair| {
       async {
         let dc_file: DcFile = serde_cbor::from_slice(&id_pair.1)?;
         Ok(dc_file.to_url())
-  }
-  DB.init(ArcStr::from("dc").some());
-  RES.init().await;
-  // RES.resolve_photo_url(|id_pair| { } todo
-  SERVER.init(&CONFIG.nats.address).await;
+      }
+      .boxed()
+    })
+    .build()
+    .apply()
+    .await;
+
   let framework = StandardFramework::new()
     .configure(|c| c.prefix("/"))
     .help(&framework::HELP)
@@ -94,17 +100,18 @@ async fn run() -> Result<(), anyhow::Error> {
       intents
     })
     .await
-    .expect("Err creating client");
+    .expect("创建Discord客户端失败");
   BOT_CLIENT.init(client.cache_and_http.clone());
+
   // a shutdown handle task
   let shard_manager = client.shard_manager.clone();
   tokio::spawn(async move {
     tokio::signal::ctrl_c()
       .await
       .expect("Could not register ctrl+c handler");
-    info!("Mesagisto Bot is shutting down");
+    info!("Mesagisto Bot 正在关闭");
     shard_manager.lock().await.shutdown_all().await;
-    info!("Saving configuration file");
+    info!("正在保存配置文件");
     CONFIG.save();
   });
 
