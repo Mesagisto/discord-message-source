@@ -1,24 +1,34 @@
+use arcstr::ArcStr;
 use dashmap::DashMap;
 use serde::{Deserialize, Serialize};
-use std::{path::Path, sync::Arc};
+use std::path::Path;
 
 #[basic_derive]
 #[derive(AutoConfig)]
 #[location = "config/dc.yml"]
 pub struct Config {
   #[educe(Default = false)]
-  pub enabled: bool,
-  pub forwarding: ForwardingConfig,
+  pub enable: bool,
   pub discord: DiscordConfig,
   pub proxy: ProxyConfig,
-  pub target_address_mapper: DashMap<u64, Arc<String>>,
+  pub nats: NatsConfig,
+  pub cipher: CipherConfig,
+  pub target_address_mapper: DashMap<u64, ArcStr>,
+}
+impl Config {
+  pub fn mapper(&self, target: &u64) -> Option<ArcStr> {
+    match self.target_address_mapper.get(target) {
+      Some(v) => return Some(v.clone()),
+      None => return None,
+    }
+  }
 }
 
 #[basic_derive]
-pub struct ForwardingConfig {
+pub struct NatsConfig {
   // pattern: "nats://{host}:{port}"
   #[educe(Default = "nats://itsusinn.site:4222")]
-  pub address: String,
+  pub address: ArcStr,
 }
 
 #[basic_derive]
@@ -30,8 +40,20 @@ pub struct DiscordConfig {
 #[basic_derive]
 pub struct ProxyConfig {
   #[educe(Default = false)]
-  pub enabled: bool,
+  pub enable: bool,
+  #[educe(Default = true)]
+  pub enable_for_mesagisto: bool,
   // pattern: "http://{username}:{password}@{host}:{port}"
   #[educe(Default = "http://127.0.0.1:7890")]
-  pub address: String,
+  pub address: ArcStr,
+}
+
+#[basic_derive]
+pub struct CipherConfig {
+  #[educe(Default = true)]
+  pub enable: bool,
+  #[educe(Default = "this-is-an-example-key")]
+  pub key: ArcStr,
+  #[educe(Default = true)]
+  pub refuse_plain: bool,
 }
