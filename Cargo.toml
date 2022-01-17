@@ -10,7 +10,6 @@ edition = "2018"
 serenity = { branch = "next",git = "https://github.com/serenity-rs/serenity.git"}
 
 # logging
-env_logger = "0.9.0"
 pretty_env_logger = "0.4.0"
 log = "0.4.14"
 
@@ -44,7 +43,7 @@ serde_cbor = "0.11.2"
 
 # mesagisto
 nats = "0.16.0"
-mesagisto-client = { rev = "02df84a", git = "https://github.com/MeowCat-Studio/mesagisto-client-rs.git" }
+mesagisto-client = { rev = "68f050", git = "https://github.com/MeowCat-Studio/mesagisto-client-rs.git"}
 # mesagisto-client = { path = "../../mesagisto-client/rust" }
 automatic-config = { git = "https://github.com/Itsusinn/automatic-config-rs.git" }
 singleton = { git = "https://github.com/Itsusinn/singleton-rs.git", rev = "bee321c" }

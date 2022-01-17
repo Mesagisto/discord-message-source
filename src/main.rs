@@ -5,6 +5,7 @@ use crate::bot::{DcFile, BOT_CLIENT};
 use anyhow::Result;
 use config::CONFIG;
 use mesagisto_client::MesagistoConfig;
+use pretty_env_logger::env_logger::{self, TimestampPrecision};
 use serenity::{
   client::ClientBuilder, framework::standard::StandardFramework, model::gateway::GatewayIntents,
 };
@@ -33,9 +34,9 @@ fn main() {
   env_logger::builder()
     .write_style(env_logger::WriteStyle::Auto)
     .filter(None, log::LevelFilter::Error)
-    .format_timestamp(None)
-    .filter(Some("discord_message_source"), log::LevelFilter::Trace)
-    .filter(Some("mesagisto_client"), log::LevelFilter::Trace)
+    .format_timestamp(Some(TimestampPrecision::Seconds))
+    .filter(Some("discord_message_source"), log::LevelFilter::Info)
+    .filter(Some("mesagisto_client"), log::LevelFilter::Info)
     .filter(Some("serenity"), log::LevelFilter::Warn)
     .init();
   tokio::runtime::Builder::new_multi_thread()
