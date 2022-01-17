@@ -74,16 +74,13 @@ pub async fn handle_receive_message(mut message: Message, target_id: u64) -> any
         let channel = CONFIG.mapper(&target_id).expect("Channel don't exist");
         let path = CACHE.file(&id, &url, &channel).await?;
         let receipt = target
-          .send_message(&**BOT_CLIENT, |m|
-            m.content(format!("{}:", sender_name))
-          )
+          .send_message(&**BOT_CLIENT, |m| m.content(format!("{}:", sender_name)))
           .await?;
         DB.put_msg_id_ir_2(&target_id, &receipt.id.as_u64(), &message.id)?;
-        let kind = infer::get_from_path(&path)
-          .expect("file read successfully");
+        let kind = infer::get_from_path(&path).expect("file read successfully");
 
         let filename = match kind {
-          Some(ty) => format!("{:?}.{}",path.file_name().unwrap(), ty.extension()),
+          Some(ty) => format!("{:?}.{}", path.file_name().unwrap(), ty.extension()),
           None => path.file_name().unwrap().to_string_lossy().to_string(),
         };
         let attachment = AttachmentType::File {
@@ -91,9 +88,7 @@ pub async fn handle_receive_message(mut message: Message, target_id: u64) -> any
           filename,
         };
         let receipt = target
-          .send_message(&**BOT_CLIENT, |m|
-            m.add_file(attachment)
-          )
+          .send_message(&**BOT_CLIENT, |m| m.add_file(attachment))
           .await?;
         DB.put_msg_id_1(&target_id, &message.id, &receipt.id.as_u64())?;
       }
