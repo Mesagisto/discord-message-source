@@ -2,7 +2,6 @@ use crate::bot::BOT_CLIENT;
 use crate::CONFIG;
 use crate::{bot::DcFile, ext::db::DbExt, ext::res::ResExt};
 use arcstr::ArcStr;
-use mesagisto_client::OptionExt;
 use mesagisto_client::{
   data::{
     message::{self, MessageType, Profile},
@@ -59,7 +58,10 @@ pub async fn answer_common(msg: &Message) -> anyhow::Result<()> {
   }
 
   let reply = match &msg.referenced_message {
-    Some(v) => v.id.as_u64().to_be_bytes().to_vec().some(),
+    Some(v) => {
+      let local_id = v.id.as_u64().to_be_bytes().to_vec();
+      DB.get_msg_id_2(&target, &local_id).unwrap_or(None)
+    }
     None => None,
   };
   // msg.attachments.get(0).unwrap().content_type;
