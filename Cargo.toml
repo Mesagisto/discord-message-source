@@ -47,3 +47,6 @@ mesagisto-client = { rev = "68f050", git = "https://github.com/MeowCat-Studio/me
 # mesagisto-client = { path = "../../mesagisto-client/rust" }
 automatic-config = { git = "https://github.com/Itsusinn/automatic-config-rs.git" }
 singleton = { git = "https://github.com/Itsusinn/singleton-rs.git", rev = "bee321c" }
+[profile.release]
+lto = true
+codegen-units = 1
