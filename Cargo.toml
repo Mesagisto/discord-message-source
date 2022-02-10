@@ -10,8 +10,9 @@ edition = "2021"
 serenity = { rev = "82c2415",git = "https://github.com/serenity-rs/serenity.git" }
 
 # logging
-pretty_env_logger = "0.4.0"
-log = "0.4.14"
+tracing="0.1.30"
+tracing-subscriber = { version = "0.3.8", features = ["env-filter","tracing-log"]}
+log="0.4.14"
 
 # asynchronous
 tokio = { version = "1.15.0",default-features = false,features = ["macros", "rt-multi-thread","signal"] }

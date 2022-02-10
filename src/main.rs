@@ -1,18 +1,16 @@
 #![allow(incomplete_features)]
-#![feature(backtrace, capture_disjoint_fields)]
+#![feature(capture_disjoint_fields)]
 
 use crate::bot::{DcFile, BOT_CLIENT};
 use anyhow::Result;
 use config::CONFIG;
 use mesagisto_client::MesagistoConfig;
-use pretty_env_logger::env_logger::{self, TimestampPrecision};
 use serenity::{
   client::{ClientBuilder, bridge::gateway::GatewayIntents}, framework::standard::StandardFramework,
 };
 use smol::future::FutureExt;
+use tracing::{warn, info};
 
-#[macro_use]
-extern crate log;
 #[macro_use]
 extern crate educe;
 #[macro_use]
@@ -29,37 +27,28 @@ mod framework;
 mod message;
 mod net;
 
-fn main() {
-  std::backtrace::Backtrace::force_capture();
-  env_logger::builder()
-    .write_style(env_logger::WriteStyle::Auto)
-    .filter(None, log::LevelFilter::Error)
-    .format_timestamp(Some(TimestampPrecision::Seconds))
-    .filter(Some("discord_message_source"), log::LevelFilter::Info)
-    .filter(Some("mesagisto_client"), log::LevelFilter::Info)
-    .filter(Some("serenity"), log::LevelFilter::Warn)
-    .init();
-  tokio::runtime::Builder::new_multi_thread()
-    // fixme: how many do we need
-    .worker_threads(5)
-    .enable_all()
-    .build()
-    .unwrap()
-    .block_on(async {
-      run().await.unwrap();
-    });
+#[tokio::main]
+async fn main(){
+  run().await.unwrap();
 }
 
 async fn run() -> Result<(), anyhow::Error> {
+
+  let env = tracing_subscriber::EnvFilter::from("warn")
+    .add_directive("serenity=warn".parse()?)
+    .add_directive("discord_message_source=info".parse()?)
+    .add_directive("mesagisto_client=info".parse()?);
+  tracing_subscriber::fmt().with_env_filter(env).init();
+
   if !CONFIG.enable {
-    log::warn!("Mesagisto-Bot is not enabled and is about to exit the program.");
-    log::warn!("To enable it, please modify the configuration file.");
-    log::warn!("Mesagisto-Bot未被启用，即将退出程序。");
-    log::warn!("若要启用，请修改配置文件。");
+    warn!("Mesagisto-Bot is not enabled and is about to exit the program.");
+    warn!("To enable it, please modify the configuration file.");
+    warn!("Mesagisto-Bot未被启用，即将退出程序。");
+    warn!("若要启用，请修改配置文件。");
     return Ok(());
   }
-  log::info!("Mesagisto-Bot is starting up");
-  log::info!("Mesagisto-Bot正在启动");
+  info!("Mesagisto-Bot is starting up");
+  info!("Mesagisto-Bot正在启动");
 
   MesagistoConfig::builder()
     .name("dc")
@@ -109,7 +98,7 @@ async fn run() -> Result<(), anyhow::Error> {
   tokio::spawn(async move {
     tokio::signal::ctrl_c()
       .await
-      .expect("Could not register ctrl+c handler");
+      .expect("无法注册 Ctrl+C 处理回调");
     info!("Mesagisto Bot 正在关闭");
     shard_manager.lock().await.shutdown_all().await;
     info!("正在保存配置文件");
