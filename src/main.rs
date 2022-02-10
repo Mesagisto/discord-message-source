@@ -7,7 +7,7 @@ use config::CONFIG;
 use mesagisto_client::MesagistoConfig;
 use pretty_env_logger::env_logger::{self, TimestampPrecision};
 use serenity::{
-  client::ClientBuilder, framework::standard::StandardFramework, model::gateway::GatewayIntents,
+  client::{ClientBuilder, bridge::gateway::GatewayIntents}, framework::standard::StandardFramework,
 };
 use smol::future::FutureExt;
 

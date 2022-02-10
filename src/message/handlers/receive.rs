@@ -9,10 +9,10 @@ use mesagisto_client::{
   db::DB,
 };
 
-use serenity::model::{
-  channel::{AttachmentType, MessageReference},
+use serenity::{model::{
+  channel::{MessageReference},
   id::{ChannelId, MessageId},
-};
+}, http::AttachmentType};
 
 use crate::bot::BOT_CLIENT;
 use crate::config::CONFIG;

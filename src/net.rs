@@ -17,7 +17,8 @@ pub async fn build_http() -> serenity::http::Http {
       .proxy(CONFIG.proxy.address.as_str())
       .expect("Failed to create proxy for serenity")
       .client(Arc::new(builder))
-      .build()
+      .await
+      .expect("Error creating Http")
   } else {
     let builder = reqwest::Client::builder()
       .use_rustls_tls()
@@ -25,6 +26,7 @@ pub async fn build_http() -> serenity::http::Http {
       .expect("Failed to create reqwest::Client builder");
     HttpBuilder::new(CONFIG.discord.token.clone())
       .client(Arc::new(builder))
-      .build()
+      .await
+      .expect("Error creating Http")
   }
 }

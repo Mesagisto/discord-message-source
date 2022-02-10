@@ -7,7 +7,7 @@ edition = "2021"
 
 [dependencies]
 #bot
-serenity = { branch = "next",git = "https://github.com/serenity-rs/serenity.git"}
+serenity = { rev = "82c2415",git = "https://github.com/serenity-rs/serenity.git" }
 
 # logging
 pretty_env_logger = "0.4.0"
