@@ -6,7 +6,7 @@ use anyhow::Result;
 use config::CONFIG;
 use mesagisto_client::MesagistoConfig;
 use serenity::{
-  client::{ClientBuilder, bridge::gateway::GatewayIntents}, framework::standard::StandardFramework,
+  client::{ClientBuilder}, framework::standard::StandardFramework, prelude::GatewayIntents,
 };
 use smol::future::FutureExt;
 use tracing::{warn, info};
@@ -79,16 +79,18 @@ async fn run() -> Result<(), anyhow::Error> {
     .normal_message(message::handler::message_hook);
 
   let http = net::build_http().await;
-  let mut client = ClientBuilder::new_with_http(http)
+  let intents = {
+    let mut intents = GatewayIntents::all();
+    // intents.remove(GatewayIntents::GUILD_PRESENCES);
+    intents.remove(GatewayIntents::DIRECT_MESSAGE_TYPING);
+    intents.remove(GatewayIntents::DIRECT_MESSAGE_REACTIONS);
+    intents.remove(GatewayIntents::GUILD_MESSAGE_TYPING);
+    intents.remove(GatewayIntents::GUILD_MESSAGE_REACTIONS);
+    intents
+  };
+  let mut client = ClientBuilder::new_with_http(http,intents)
     .event_handler(event::Handler)
     .framework(framework)
-    .intents({
-      let mut intents = GatewayIntents::all();
-      //intents.remove(GatewayIntents::GUILD_PRESENCES);
-      intents.remove(GatewayIntents::DIRECT_MESSAGE_TYPING);
-      intents.remove(GatewayIntents::GUILD_MESSAGE_TYPING);
-      intents
-    })
     .await
     .expect("创建Discord客户端失败");
   BOT_CLIENT.init(client.cache_and_http.clone());
