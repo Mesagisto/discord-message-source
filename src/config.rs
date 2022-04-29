@@ -13,14 +13,21 @@ pub struct Config {
   pub proxy: ProxyConfig,
   pub nats: NatsConfig,
   pub cipher: CipherConfig,
-  pub target_address_mapper: DashMap<u64, ArcStr>,
+  pub bindings: DashMap<u64, ArcStr>,
+  target_address_mapper: DashMap<u64, ArcStr>,
 }
 impl Config {
   pub fn mapper(&self, target: &u64) -> Option<ArcStr> {
-    match self.target_address_mapper.get(target) {
+    match self.bindings.get(target) {
       Some(v) => return Some(v.clone()),
       None => return None,
     }
+  }
+  pub fn migrate(&self){
+    for pair in &self.target_address_mapper {
+      self.bindings.insert(pair.key().clone(), pair.value().clone());
+    }
+    self.target_address_mapper.clear();
   }
 }
 
