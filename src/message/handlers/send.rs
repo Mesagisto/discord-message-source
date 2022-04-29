@@ -14,14 +14,12 @@ use mesagisto_client::{
 };
 use serenity::model::channel::Message;
 
-use super::receive::receive_from_server;
-
 pub async fn answer_common(msg: &Message) -> anyhow::Result<()> {
   let target = msg.channel_id.as_u64();
-  if !CONFIG.target_address_mapper.contains_key(&target) {
+  if !CONFIG.bindings.contains_key(&target) {
     return Ok(());
   }
-  let address = CONFIG.target_address_mapper.get(&target).unwrap().clone();
+  let address = CONFIG.bindings.get(&target).unwrap().clone();
   let sender = &msg.author;
   let profile = Profile {
     id: sender.id.as_u64().to_be_bytes().to_vec(), // fixme
@@ -74,11 +72,11 @@ pub async fn answer_common(msg: &Message) -> anyhow::Result<()> {
   };
   let packet = Packet::from(message.tl())?;
   SERVER
-    .send_and_receive(
-      target.to_be_bytes().to_vec(),
-      address,
+    .send(
+      &target.to_string().into(),
+      &address,
       packet,
-      receive_from_server,
+      None
     )
     .await?;
   Ok(())

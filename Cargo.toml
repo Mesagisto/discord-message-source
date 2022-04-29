@@ -39,14 +39,14 @@ anyhow = "1.0.53"
 base64-url = "1.4.10"
 
 # serialization
-serde = { version = "1.0.133", features = ["derive","rc"] }
-serde_json = "1.0.74"
+serde = { version = "1.0.136", features = ["derive","rc"] }
+serde_json = "1.0.79"
 serde_yaml = "0.8.23"
 serde_cbor = "0.11.2"
 
 # mesagisto
-nats = "0.17.0"
-mesagisto-client = { rev = "49e7c5", git = "https://github.com/MeowCat-Studio/mesagisto-client-rs.git"}
+nats = "0.19.0"
+mesagisto-client = { rev = "33bc09c", git = "https://github.com/MeowCat-Studio/mesagisto-client-rs.git"}
 # mesagisto-client = { path = "../../mesagisto-client/rust" }
 automatic-config = { rev = "ac1cd3ac1a225e8b7f1c80d55fe7e5ee34fad81d", git = "https://github.com/Itsusinn/automatic-config-rs.git" }
 #automatic-config = { path = "/code/automatic-config-rs" }

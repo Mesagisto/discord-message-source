@@ -2,6 +2,7 @@
 #![feature(capture_disjoint_fields)]
 
 use crate::bot::{DcFile, BOT_CLIENT};
+use crate::message::handlers::receive;
 use anyhow::Result;
 use config::CONFIG;
 use mesagisto_client::MesagistoConfig;
@@ -37,26 +38,26 @@ async fn run() -> Result<(), anyhow::Error> {
   let env = tracing_subscriber::EnvFilter::from("warn")
     .add_directive("serenity=warn".parse()?)
     .add_directive("discord_message_source=info".parse()?)
-    .add_directive("mesagisto_client=info".parse()?);
+    .add_directive("mesagisto_client=trace".parse()?);
   tracing_subscriber::fmt().with_env_filter(env).init();
 
   if !CONFIG.enable {
     warn!("Mesagisto-Bot is not enabled and is about to exit the program.");
     warn!("To enable it, please modify the configuration file.");
-    warn!("Mesagisto-Bot未被启用，即将退出程序。");
+    warn!("Mesagisto-Bot未被启用, 即将退出程序。");
     warn!("若要启用，请修改配置文件。");
     return Ok(());
   }
   info!("Mesagisto-Bot is starting up");
   info!("Mesagisto-Bot正在启动");
-
+  CONFIG.migrate();
   MesagistoConfig::builder()
     .name("dc")
     .cipher_enable(CONFIG.cipher.enable)
     .cipher_key(CONFIG.cipher.key.clone())
     .cipher_refuse_plain(CONFIG.cipher.refuse_plain)
     .nats_address(CONFIG.nats.address.clone())
-    .proxy(if CONFIG.proxy.enable_for_mesagisto {
+    .proxy(if CONFIG.proxy.enable && CONFIG.proxy.enable_for_mesagisto {
       Some(CONFIG.proxy.address.clone())
     } else {
       None
@@ -107,6 +108,7 @@ async fn run() -> Result<(), anyhow::Error> {
     CONFIG.save();
   });
 
+  receive::recover().await?;
   // start to dispatch events
   // the coroutine will be suspend here until it stops
   client.start().await.expect("Client error");

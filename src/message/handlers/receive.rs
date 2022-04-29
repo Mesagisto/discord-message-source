@@ -1,39 +1,67 @@
-use std::convert::TryInto;
-
+use arcstr::ArcStr;
 use mesagisto_client::{
   cache::CACHE,
   data::{
     message::{Message, MessageType},
     Packet,
   },
-  db::DB,
+  db::DB, server::SERVER,
 };
 
-use serenity::{model::{
+use serenity::model::{
   channel::{MessageReference, AttachmentType},
   id::{ChannelId, MessageId},
-}};
+};
 
 use crate::bot::BOT_CLIENT;
 use crate::config::CONFIG;
 use crate::ext::db::DbExt;
 
-pub async fn receive_from_server(
+pub async fn recover() -> anyhow::Result<()> {
+  for pair in &CONFIG.bindings {
+    SERVER.recv(
+      ArcStr::from(pair.key().to_string()),
+      pair.value(),
+      server_msg_handler
+    ).await?;
+  }
+  Ok(())
+}
+pub async fn add(target:u64,address: &ArcStr) -> anyhow::Result<()> {
+  SERVER.recv(
+    target.to_string().into(),
+    address,
+    server_msg_handler
+  ).await?;
+  Ok(())
+}
+pub async fn change(target:u64,address: &ArcStr) -> anyhow::Result<()> {
+  SERVER.unsub(&target.to_string().into()).await;
+  add(target, address).await?;
+  Ok(())
+}
+pub async fn del(target: u64) -> anyhow::Result<()> {
+  SERVER.unsub(&target.to_string().into()).await;
+  Ok(())
+}
+
+pub async fn server_msg_handler(
   message: nats::asynk::Message,
-  target: Vec<u8>,
+  target: ArcStr,
 ) -> anyhow::Result<()> {
   log::trace!("接收到目标{}的消息", base64_url::encode(&target));
+  let target = target.as_str().parse::<u64>()?;
   let packet = Packet::from_cbor(&message.data)?;
   match packet {
     either::Left(msg) => {
-      handle_receive_message(msg, u64::from_be_bytes(target.try_into().unwrap())).await?;
+      left_sub_handler(msg,target).await?;
     }
     either::Right(_) => {}
   }
   Ok(())
 }
 
-pub async fn handle_receive_message(mut message: Message, target_id: u64) -> anyhow::Result<()> {
+async fn left_sub_handler(mut message: Message, target_id: u64) -> anyhow::Result<()> {
   let target = BOT_CLIENT.get_channel(target_id).await?.id();
   for single in message.chain {
     let sender_name = if message.profile.nick.is_some() {
