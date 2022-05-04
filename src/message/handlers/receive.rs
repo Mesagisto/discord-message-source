@@ -63,14 +63,14 @@ pub async fn server_msg_handler(
 
 async fn left_sub_handler(mut message: Message, target_id: u64) -> anyhow::Result<()> {
   let target = BOT_CLIENT.get_channel(target_id).await?.id();
+  let sender_name = if message.profile.nick.is_some() {
+    message.profile.nick.take().unwrap()
+  } else if message.profile.username.is_some() {
+    message.profile.username.take().unwrap()
+  } else {
+    base64_url::encode(&message.profile.id)
+  };
   for single in message.chain {
-    let sender_name = if message.profile.nick.is_some() {
-      message.profile.nick.take().unwrap()
-    } else if message.profile.username.is_some() {
-      message.profile.username.take().unwrap()
-    } else {
-      base64_url::encode(&message.profile.id)
-    };
     match single {
       MessageType::Text { content } => {
         let content = format!("{}: {}", sender_name, content);
