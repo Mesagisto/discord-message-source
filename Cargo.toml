@@ -22,7 +22,7 @@ colored = "2.0.0"
 
 # asynchronous
 tokio = { version = "1.17.0",default-features = false,features = ["macros", "rt-multi-thread","signal"] }
-reqwest = { version = "0.11.10",default-features = false,features = ["rustls","rustls-tls-webpki-roots","rustls-tls-native-roots"] }
+reqwest = { version = "0.11.10",default-features = false,features = ["rustls","rustls-tls-native-roots"] }
 smol = "1.2.5"
 sled = "0.34.7"
 
