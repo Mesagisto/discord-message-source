@@ -21,10 +21,11 @@ pub async fn answer_common(msg: &Message) -> anyhow::Result<()> {
   }
   let address = CONFIG.bindings.get(&target).unwrap().clone();
   let sender = &msg.author;
+  let nick = msg.member.as_ref().and_then(|v| v.nick.clone());
   let profile = Profile {
     id: sender.id.as_u64().to_be_bytes().to_vec(), // fixme
     username: Some(sender.name.clone()),
-    nick: None,
+    nick,
   };
   let mut chain = Vec::<MessageType>::new();
   if !msg.content.is_empty() {
