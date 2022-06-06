@@ -16,7 +16,7 @@ serenity = { version = "0.11.2", features = ["gateway"] }
 
 # logging
 tracing= "0.1.34"
-tracing-subscriber = { version = "0.3.11", default-features = false, features = ["env-filter", "tracing-log", "std", "fmt", "local-time"] }
+tracing-subscriber = { version = "0.3.11", default-features = false, features = [ "tracing-log", "std", "local-time", "fmt"] }
 log= "0.4.17"
 colored = "2.0.0"
 
