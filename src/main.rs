@@ -2,6 +2,7 @@
 #![feature(capture_disjoint_fields)]
 
 use crate::bot::{DcFile, BOT_CLIENT};
+use crate::config::Config;
 use crate::message::handlers::receive;
 use anyhow::Result;
 use config::CONFIG;
@@ -32,11 +33,6 @@ mod net;
 
 #[tokio::main]
 async fn main(){
-  run().await.unwrap();
-}
-
-async fn run() -> Result<(), anyhow::Error> {
-
   tracing_subscriber::registry()
   .with(
     tracing_subscriber::fmt::layer()
@@ -57,7 +53,11 @@ async fn run() -> Result<(), anyhow::Error> {
       .with_default(Level::WARN),
   )
   .init();
+  run().await.unwrap();
+}
 
+async fn run() -> Result<(), anyhow::Error> {
+  Config::reload().await?;
   if !CONFIG.enable {
     warn!("Mesagisto-Bot is not enabled and is about to exit the program.");
     warn!("To enable it, please modify the configuration file.");
@@ -65,8 +65,10 @@ async fn run() -> Result<(), anyhow::Error> {
     warn!("若要启用，请修改配置文件。");
     return Ok(());
   }
-  info!("Mesagisto-Bot is starting up");
-  info!("Mesagisto-Bot正在启动");
+  info!(
+    "Mesagisto信使正在启动, version: v{}",
+    env!("CARGO_PKG_VERSION")
+  );
   CONFIG.migrate();
   MesagistoConfig::builder()
     .name("dc")
@@ -119,10 +121,10 @@ async fn run() -> Result<(), anyhow::Error> {
     tokio::signal::ctrl_c()
       .await
       .expect("无法注册 Ctrl+C 处理回调");
-    info!("Mesagisto Bot 正在关闭");
+    info!("Mesagisto信使 正在关闭");
     shard_manager.lock().await.shutdown_all().await;
     info!("正在保存配置文件");
-    CONFIG.save();
+    CONFIG.save().await.expect("保存配置文件失败");
   });
 
   receive::recover().await?;

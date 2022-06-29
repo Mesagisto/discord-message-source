@@ -1,9 +1,10 @@
 use std::{ops::Deref, sync::Arc};
 
 use arcstr::ArcStr;
-use mesagisto_client::{cache::CACHE, LateInit};
+use mesagisto_client::{cache::CACHE};
 use serde::{Deserialize, Serialize};
 use serenity::CacheAndHttp;
+use lateinit::LateInit;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct DcFile(u64, u64, ArcStr);

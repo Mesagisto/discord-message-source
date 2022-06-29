@@ -1,10 +1,8 @@
 use arcstr::ArcStr;
 use dashmap::DashMap;
-use serde::{Deserialize, Serialize};
-use std::path::Path;
 
-#[basic_derive]
-#[derive(AutoConfig)]
+#[config_derive]
+#[derive(AutomaticConfig)]
 #[location = "config/dc.yml"]
 pub struct Config {
   #[educe(Default = false)]
@@ -31,20 +29,20 @@ impl Config {
   }
 }
 
-#[basic_derive]
+#[config_derive]
 pub struct NatsConfig {
   // pattern: "nats://{host}:{port}"
   #[educe(Default = "nats://itsusinn.site:4222")]
   pub address: ArcStr,
 }
 
-#[basic_derive]
+#[config_derive]
 pub struct DiscordConfig {
   #[educe(Default = "BOT.TOKEN")]
   pub token: String,
 }
 
-#[basic_derive]
+#[config_derive]
 pub struct ProxyConfig {
   #[educe(Default = false)]
   pub enable: bool,
@@ -53,7 +51,7 @@ pub struct ProxyConfig {
   pub address: ArcStr,
 }
 
-#[basic_derive]
+#[config_derive]
 pub struct CipherConfig {
   #[educe(Default = true)]
   pub enable: bool,
