@@ -105,7 +105,7 @@ async fn left_sub_handler(mut message: Message, target_id: u64) -> anyhow::Resul
         let receipt = target
           .send_message(&**BOT_CLIENT, |m| m.content(format!("{}:", sender_name)))
           .await?;
-        DB.put_msg_id_ir_2(&target_id, &receipt.id.as_u64(), &message.id)?;
+        DB.put_msg_id_ir_2(&target_id, receipt.id.as_u64(), &message.id)?;
         let kind = infer::get_from_path(&path).expect("file read failed when refering file type");
 
         let filename = match kind {
@@ -119,7 +119,7 @@ async fn left_sub_handler(mut message: Message, target_id: u64) -> anyhow::Resul
         let receipt = target
           .send_message(&**BOT_CLIENT, |m| m.add_file(attachment))
           .await?;
-        DB.put_msg_id_1(&target_id, &message.id, &receipt.id.as_u64())?;
+        DB.put_msg_id_1(&target_id, &message.id, receipt.id.as_u64())?;
       }
       _ => {}
     }

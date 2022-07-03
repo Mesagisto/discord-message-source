@@ -16,10 +16,10 @@ use serenity::model::channel::Message;
 
 pub async fn answer_common(msg: &Message) -> anyhow::Result<()> {
   let target = msg.channel_id.as_u64();
-  if !CONFIG.bindings.contains_key(&target) {
+  if !CONFIG.bindings.contains_key(target) {
     return Ok(());
   }
-  let address = CONFIG.bindings.get(&target).unwrap().clone();
+  let address = CONFIG.bindings.get(target).unwrap().clone();
   let sender = &msg.author;
   let nick = msg.member.as_ref().and_then(|v| v.nick.clone());
   let profile = Profile {
@@ -49,7 +49,6 @@ pub async fn answer_common(msg: &Message) -> anyhow::Result<()> {
             id: attach.id.as_u64().to_be_bytes().to_vec(),
             url: None,
           });
-          ()
         }
       }
       None => (),
@@ -59,12 +58,12 @@ pub async fn answer_common(msg: &Message) -> anyhow::Result<()> {
   let reply = match &msg.referenced_message {
     Some(v) => {
       let local_id = v.id.as_u64().to_be_bytes().to_vec();
-      DB.get_msg_id_2(&target, &local_id).unwrap_or(None)
+      DB.get_msg_id_2(target, &local_id).unwrap_or(None)
     }
     None => None,
   };
   // msg.attachments.get(0).unwrap().content_type;
-  DB.put_msg_id_ir_0(&target, msg.id.as_u64(), msg.id.as_u64())?;
+  DB.put_msg_id_ir_0(target, msg.id.as_u64(), msg.id.as_u64())?;
   let message = message::Message {
     profile,
     id: msg.id.as_u64().to_be_bytes().to_vec(),

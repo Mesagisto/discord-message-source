@@ -16,14 +16,11 @@ pub struct Config {
 }
 impl Config {
   pub fn mapper(&self, target: &u64) -> Option<ArcStr> {
-    match self.bindings.get(target) {
-      Some(v) => return Some(v.clone()),
-      None => return None,
-    }
+    self.bindings.get(target).map(|v| v.clone())
   }
   pub fn migrate(&self){
     for pair in &self.target_address_mapper {
-      self.bindings.insert(pair.key().clone(), pair.value().clone());
+      self.bindings.insert(*pair.key(), pair.value().clone());
     }
     self.target_address_mapper.clear();
   }

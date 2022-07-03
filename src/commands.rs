@@ -32,7 +32,7 @@ pub async fn bind(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult
     msg.reply(ctx, "<channel> 参数为空").await?;
   }
   let channel: ArcStr = args.single::<String>().unwrap().into();
-  match CONFIG.bindings.insert(msg.channel_id.as_u64().clone(), channel.clone()){
+  match CONFIG.bindings.insert(*msg.channel_id.as_u64(), channel.clone()){
     Some(_) => {
       handlers::receive::change(*msg.channel_id.as_u64(), &channel).await?;
       msg
@@ -60,7 +60,7 @@ pub async fn bind(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult
 #[description = "Unbind mesagisto-channel for current channel | 删除当前频道的信使频道"]
 pub async fn unbind(ctx: &Context, msg: &Message) -> CommandResult {
   let chat_id = msg.channel_id.as_u64();
-  match CONFIG.bindings.remove(&chat_id) {
+  match CONFIG.bindings.remove(chat_id) {
     Some(_) => {
       msg
       .reply(
