@@ -72,9 +72,7 @@ async fn run() -> Result<(), anyhow::Error> {
   CONFIG.migrate();
   MesagistoConfig::builder()
     .name("dc")
-    .cipher_enable(CONFIG.cipher.enable)
     .cipher_key(CONFIG.cipher.key.clone())
-    .cipher_refuse_plain(CONFIG.cipher.refuse_plain)
     .nats_address(CONFIG.nats.address.clone())
     .proxy(if CONFIG.proxy.enable {
       Some(CONFIG.proxy.address.clone())

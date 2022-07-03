@@ -53,10 +53,6 @@ pub struct ProxyConfig {
 
 #[config_derive]
 pub struct CipherConfig {
-  #[educe(Default = true)]
-  pub enable: bool,
-  #[educe(Default = "this-is-an-example-key")]
+  #[educe(Default = "default")]
   pub key: ArcStr,
-  #[educe(Default = true)]
-  pub refuse_plain: bool,
 }
