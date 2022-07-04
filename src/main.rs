@@ -88,7 +88,7 @@ async fn run() -> Result<(), anyhow::Error> {
     })
     .build()
     .apply()
-    .await;
+    .await?;
 
   let framework = StandardFramework::new()
     .configure(|c| c.prefix("/"))

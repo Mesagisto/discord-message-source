@@ -51,7 +51,7 @@ serde_yaml = "0.8.24"
 serde_cbor = "0.11.2"
 
 # mesagisto
-nats = "0.21.0"
+nats = { package = "async-nats", version = "0.15.0" }
 mesagisto-client = { branch = "master", git = "https://github.com/MeowCat-Studio/mesagisto-client-rs.git"}
 # mesagisto-client = { path = "../../mesagisto-client/rust" }
 automatic-config = { branch = "master", git = "https://github.com/Itsusinn/automatic-config-rs.git" }

@@ -47,12 +47,12 @@ pub async fn del(target: u64) -> anyhow::Result<()> {
 }
 
 pub async fn server_msg_handler(
-  message: nats::asynk::Message,
+  message: nats::Message,
   target: ArcStr,
 ) -> anyhow::Result<()> {
   trace!("接收到目标{}的消息", base64_url::encode(&target));
   let target = target.as_str().parse::<u64>()?;
-  let packet = Packet::from_cbor(&message.data)?;
+  let packet = Packet::from_cbor(&message.payload)?;
   match packet {
     either::Left(msg) => {
       left_sub_handler(msg,target).await?;
