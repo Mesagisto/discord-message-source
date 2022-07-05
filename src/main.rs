@@ -8,7 +8,7 @@ use anyhow::Result;
 use config::CONFIG;
 use mesagisto_client::MesagistoConfig;
 use serenity::{
-  client::{ClientBuilder}, framework::standard::StandardFramework, prelude::GatewayIntents,
+  client::ClientBuilder, framework::standard::StandardFramework, prelude::GatewayIntents,
 };
 use smol::future::FutureExt;
 use tracing::{warn, info, Level};
