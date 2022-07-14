@@ -99,25 +99,19 @@ async fn run() -> Result<()> {
   let mut client = ClientBuilder::new_with_http(http,intents)
     .event_handler(event::Handler)
     .framework(framework)
-    .await
-    .expect("创建Discord客户端失败");
+    .await?;
   BOT_CLIENT.init(client.cache_and_http.clone());
 
-  // a shutdown handle task
   let shard_manager = client.shard_manager.clone();
+  receive::recover().await?;
   tokio::spawn(async move {
-    tokio::signal::ctrl_c()
-      .await
-      .expect("无法注册 Ctrl+C 处理回调");
-    info!("Mesagisto信使 正在关闭");
-    shard_manager.lock().await.shutdown_all().await;
-    info!("正在保存配置文件");
-    CONFIG.save().await.expect("保存配置文件失败");
+    client.start().await.expect("Client error");
   });
 
-  receive::recover().await?;
-  // start to dispatch events
-  // the coroutine will be suspend here until it stops
-  client.start().await.expect("Client error");
+  tokio::signal::ctrl_c().await?;
+  shard_manager.lock().await.shutdown_all().await;
+  info!("Mesagisto信使 正在关闭");
+  info!("正在保存配置文件");
+  CONFIG.save().await?;
   Ok(())
 }

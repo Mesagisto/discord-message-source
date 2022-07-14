@@ -5,7 +5,7 @@ use tracing_subscriber::prelude::*;
 pub(crate) fn init()  {
 
   let mut filter = tracing_subscriber::filter::Targets::new()
-    .with_target("serenity", Level::INFO)
+    .with_target("serenity", Level::WARN)
     .with_target("discord_message_source", Level::INFO)
     .with_target("mesagisto_client", Level::TRACE)
     .with_default(Level::WARN);
