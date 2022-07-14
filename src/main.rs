@@ -11,9 +11,7 @@ use serenity::{
   client::ClientBuilder, framework::standard::StandardFramework, prelude::GatewayIntents,
 };
 use smol::future::FutureExt;
-use tracing::{warn, info, Level};
-use tracing_subscriber::{prelude::__tracing_subscriber_SubscriberExt, util::SubscriberInitExt};
-
+use tracing::{warn, info};
 
 #[macro_use]
 extern crate educe;
