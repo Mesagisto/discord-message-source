@@ -1,6 +1,7 @@
-use crate::bot::DcFile;
-use mesagisto_client::res::Res;
 use color_eyre::eyre::Result;
+use mesagisto_client::res::Res;
+
+use crate::bot::DcFile;
 
 pub trait ResExt {
   fn put_dc_image_id(&self, uid: &u64, file_id: &DcFile) -> Result<()>;

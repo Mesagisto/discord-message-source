@@ -1,9 +1,6 @@
 #![allow(incomplete_features)]
-#![feature(capture_disjoint_fields,backtrace)]
+#![feature(capture_disjoint_fields, backtrace)]
 
-use crate::bot::{DcFile, BOT_CLIENT};
-use crate::config::Config;
-use crate::message::handlers::receive;
 use color_eyre::eyre::Result;
 use config::CONFIG;
 use mesagisto_client::MesagistoConfig;
@@ -11,7 +8,13 @@ use serenity::{
   client::ClientBuilder, framework::standard::StandardFramework, prelude::GatewayIntents,
 };
 use smol::future::FutureExt;
-use tracing::{warn, info};
+use tracing::{info, warn};
+
+use crate::{
+  bot::{DcFile, BOT_CLIENT},
+  config::Config,
+  message::handlers::receive,
+};
 
 #[macro_use]
 extern crate educe;
@@ -26,19 +29,18 @@ mod config;
 mod event;
 pub mod ext;
 mod framework;
+mod log;
 mod message;
 mod net;
-mod log;
 
 #[tokio::main]
-async fn main() -> Result<()>{
-
+async fn main() -> Result<()> {
   if cfg!(feature = "color") {
     color_eyre::install()?;
   } else {
     color_eyre::config::HookBuilder::new()
-    .theme(color_eyre::config::Theme::new())
-    .install()?;
+      .theme(color_eyre::config::Theme::new())
+      .install()?;
   }
 
   self::log::init();
@@ -96,7 +98,7 @@ async fn run() -> Result<()> {
     intents.remove(GatewayIntents::GUILD_MESSAGE_REACTIONS);
     intents
   };
-  let mut client = ClientBuilder::new_with_http(http,intents)
+  let mut client = ClientBuilder::new_with_http(http, intents)
     .event_handler(event::Handler)
     .framework(framework)
     .await?;

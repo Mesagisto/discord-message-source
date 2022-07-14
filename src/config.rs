@@ -1,6 +1,6 @@
 use arcstr::ArcStr;
-use dashmap::DashMap;
 use color_eyre::eyre::{Error, Result};
+use dashmap::DashMap;
 
 #[config_derive]
 #[derive(AutomaticConfig)]
@@ -19,7 +19,8 @@ impl Config {
   pub fn mapper(&self, target: &u64) -> Option<ArcStr> {
     self.bindings.get(target).map(|v| v.clone())
   }
-  pub fn migrate(&self){
+
+  pub fn migrate(&self) {
     for pair in &self.target_address_mapper {
       self.bindings.insert(*pair.key(), pair.value().clone());
     }

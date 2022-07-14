@@ -1,43 +1,41 @@
 use arcstr::ArcStr;
+use color_eyre::eyre::Result;
 use mesagisto_client::{
   cache::CACHE,
   data::{
     message::{Message, MessageType},
     Packet,
   },
-  db::DB, server::SERVER,
+  db::DB,
+  server::SERVER,
 };
-
 use serenity::model::{
-  channel::{MessageReference, AttachmentType},
+  channel::{AttachmentType, MessageReference},
   id::{ChannelId, MessageId},
 };
 use tracing::trace;
-use color_eyre::eyre::Result;
 
-use crate::bot::BOT_CLIENT;
-use crate::config::CONFIG;
-use crate::ext::db::DbExt;
+use crate::{bot::BOT_CLIENT, config::CONFIG, ext::db::DbExt};
 
 pub async fn recover() -> Result<()> {
   for pair in &CONFIG.bindings {
-    SERVER.recv(
-      ArcStr::from(pair.key().to_string()),
-      pair.value(),
-      server_msg_handler
-    ).await?;
+    SERVER
+      .recv(
+        ArcStr::from(pair.key().to_string()),
+        pair.value(),
+        server_msg_handler,
+      )
+      .await?;
   }
   Ok(())
 }
-pub async fn add(target:u64,address: &ArcStr) -> Result<()> {
-  SERVER.recv(
-    target.to_string().into(),
-    address,
-    server_msg_handler
-  ).await?;
+pub async fn add(target: u64, address: &ArcStr) -> Result<()> {
+  SERVER
+    .recv(target.to_string().into(), address, server_msg_handler)
+    .await?;
   Ok(())
 }
-pub async fn change(target:u64,address: &ArcStr) -> Result<()> {
+pub async fn change(target: u64, address: &ArcStr) -> Result<()> {
   SERVER.unsub(&target.to_string().into());
   add(target, address).await?;
   Ok(())
@@ -47,16 +45,13 @@ pub async fn del(target: u64) -> Result<()> {
   Ok(())
 }
 
-pub async fn server_msg_handler(
-  message: nats::Message,
-  target: ArcStr,
-) -> Result<()> {
+pub async fn server_msg_handler(message: nats::Message, target: ArcStr) -> Result<()> {
   trace!("接收到目标{}的消息", base64_url::encode(&target));
   let target = target.as_str().parse::<u64>()?;
   let packet = Packet::from_cbor(&message.payload)?;
   match packet {
     either::Left(msg) => {
-      left_sub_handler(msg,target).await?;
+      left_sub_handler(msg, target).await?;
     }
     either::Right(_) => {}
   }

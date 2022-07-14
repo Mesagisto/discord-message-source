@@ -1,7 +1,5 @@
-use crate::bot::BOT_CLIENT;
-use crate::CONFIG;
-use crate::{bot::DcFile, ext::db::DbExt, ext::res::ResExt};
 use arcstr::ArcStr;
+use color_eyre::eyre::Result;
 use mesagisto_client::{
   data::{
     message::{self, MessageType, Profile},
@@ -13,7 +11,12 @@ use mesagisto_client::{
   EitherExt,
 };
 use serenity::model::channel::Message;
-use color_eyre::eyre::Result;
+
+use crate::{
+  bot::{DcFile, BOT_CLIENT},
+  ext::{db::DbExt, res::ResExt},
+  CONFIG,
+};
 
 pub async fn answer_common(msg: &Message) -> Result<()> {
   let target = msg.channel_id.as_u64();
@@ -73,12 +76,7 @@ pub async fn answer_common(msg: &Message) -> Result<()> {
   };
   let packet = Packet::from(message.tl())?;
   SERVER
-    .send(
-      &target.to_string().into(),
-      &address,
-      packet,
-      None
-    )
+    .send(&target.to_string().into(), &address, packet, None)
     .await?;
   Ok(())
 }

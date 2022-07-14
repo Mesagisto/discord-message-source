@@ -1,4 +1,5 @@
-use crate::commands::*;
+use std::collections::HashSet;
+
 use serenity::{
   client::Context,
   framework::standard::{
@@ -8,7 +9,8 @@ use serenity::{
   },
   model::{channel::Message, id::UserId},
 };
-use std::collections::HashSet;
+
+use crate::commands::*;
 
 #[group("**Commands**|**命令列表**")]
 #[description = "Commands of Mesagisto"]
@@ -21,10 +23,12 @@ pub struct Mesagisto;
 > 如果你想获得关于某个特定命令的更多信息，只需将该命令作为help命令的参数传入。"]
 #[command_not_found_text = "Could not find: `{}`."]
 #[strikethrough_commands_tip_in_dm = "
-> ~~`Strikethrough commands`~~ are unavailable because they require permissions, require a specific role, require certain conditions.
+> ~~`Strikethrough commands`~~ are unavailable because they require permissions, require a \
+                                      specific role, require certain conditions.
 > ~~`带删除线的命令`~~无法使用，因为它们需要权限、特定的角色、某些条件等。"]
 #[strikethrough_commands_tip_in_guild = "
-> ~~`Strikethrough commands`~~ are unavailable because they require permissions, require a specific role, require certain conditions.
+> ~~`Strikethrough commands`~~ are unavailable because they require permissions, require a \
+                                         specific role, require certain conditions.
 > ~~`带删除线的命令`~~无法使用，因为它们需要权限、特定的角色、某些条件等。"]
 #[max_levenshtein_distance(3)]
 #[lacking_permissions = "Hide"]
