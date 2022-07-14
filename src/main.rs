@@ -1,10 +1,10 @@
 #![allow(incomplete_features)]
-#![feature(capture_disjoint_fields)]
+#![feature(capture_disjoint_fields,backtrace)]
 
 use crate::bot::{DcFile, BOT_CLIENT};
 use crate::config::Config;
 use crate::message::handlers::receive;
-use anyhow::Result;
+use color_eyre::eyre::Result;
 use config::CONFIG;
 use mesagisto_client::MesagistoConfig;
 use serenity::{
@@ -30,33 +30,25 @@ pub mod ext;
 mod framework;
 mod message;
 mod net;
+mod log;
 
 #[tokio::main]
-async fn main(){
-  tracing_subscriber::registry()
-  .with(
-    tracing_subscriber::fmt::layer()
-      .with_target(true)
-      .with_timer(tracing_subscriber::fmt::time::OffsetTime::new(
-        // use local time
-        time::UtcOffset::__from_hms_unchecked(8, 0, 0),
-        time::macros::format_description!(
-          "[year repr:last_two]-[month]-[day] [hour]:[minute]:[second]"
-        ),
-      )),
-  )
-  .with(
-    tracing_subscriber::filter::Targets::new()
-      .with_target("serenity", Level::WARN)
-      .with_target("discord_message_source", Level::INFO)
-      .with_target("mesagisto_client", Level::TRACE)
-      .with_default(Level::WARN),
-  )
-  .init();
-  run().await.unwrap();
+async fn main() -> Result<()>{
+
+  if cfg!(feature = "color") {
+    color_eyre::install()?;
+  } else {
+    color_eyre::config::HookBuilder::new()
+    .theme(color_eyre::config::Theme::new())
+    .install()?;
+  }
+
+  self::log::init();
+  run().await?;
+  Ok(())
 }
 
-async fn run() -> Result<(), anyhow::Error> {
+async fn run() -> Result<()> {
   Config::reload().await?;
   if !CONFIG.enable {
     warn!("Mesagisto-Bot is not enabled and is about to exit the program.");

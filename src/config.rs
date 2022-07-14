@@ -1,5 +1,6 @@
 use arcstr::ArcStr;
 use dashmap::DashMap;
+use color_eyre::eyre::{Error, Result};
 
 #[config_derive]
 #[derive(AutomaticConfig)]
@@ -28,8 +29,8 @@ impl Config {
 
 #[config_derive]
 pub struct NatsConfig {
-  // pattern: "nats://{host}:{port}"
-  #[educe(Default = "nats://itsusinn.site:4222")]
+  // pattern: "nats://{token}@{host}:{port}"
+  #[educe(Default = "nats://nats.mesagisto.org:4222")]
   pub address: ArcStr,
 }
 

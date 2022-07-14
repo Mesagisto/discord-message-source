@@ -13,8 +13,9 @@ use mesagisto_client::{
   EitherExt,
 };
 use serenity::model::channel::Message;
+use color_eyre::eyre::Result;
 
-pub async fn answer_common(msg: &Message) -> anyhow::Result<()> {
+pub async fn answer_common(msg: &Message) -> Result<()> {
   let target = msg.channel_id.as_u64();
   if !CONFIG.bindings.contains_key(target) {
     return Ok(());

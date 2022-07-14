@@ -13,12 +13,13 @@ use serenity::model::{
   id::{ChannelId, MessageId},
 };
 use tracing::trace;
+use color_eyre::eyre::Result;
 
 use crate::bot::BOT_CLIENT;
 use crate::config::CONFIG;
 use crate::ext::db::DbExt;
 
-pub async fn recover() -> anyhow::Result<()> {
+pub async fn recover() -> Result<()> {
   for pair in &CONFIG.bindings {
     SERVER.recv(
       ArcStr::from(pair.key().to_string()),
@@ -28,7 +29,7 @@ pub async fn recover() -> anyhow::Result<()> {
   }
   Ok(())
 }
-pub async fn add(target:u64,address: &ArcStr) -> anyhow::Result<()> {
+pub async fn add(target:u64,address: &ArcStr) -> Result<()> {
   SERVER.recv(
     target.to_string().into(),
     address,
@@ -36,12 +37,12 @@ pub async fn add(target:u64,address: &ArcStr) -> anyhow::Result<()> {
   ).await?;
   Ok(())
 }
-pub async fn change(target:u64,address: &ArcStr) -> anyhow::Result<()> {
+pub async fn change(target:u64,address: &ArcStr) -> Result<()> {
   SERVER.unsub(&target.to_string().into());
   add(target, address).await?;
   Ok(())
 }
-pub async fn del(target: u64) -> anyhow::Result<()> {
+pub async fn del(target: u64) -> Result<()> {
   SERVER.unsub(&target.to_string().into());
   Ok(())
 }
@@ -49,7 +50,7 @@ pub async fn del(target: u64) -> anyhow::Result<()> {
 pub async fn server_msg_handler(
   message: nats::Message,
   target: ArcStr,
-) -> anyhow::Result<()> {
+) -> Result<()> {
   trace!("接收到目标{}的消息", base64_url::encode(&target));
   let target = target.as_str().parse::<u64>()?;
   let packet = Packet::from_cbor(&message.payload)?;
@@ -62,7 +63,7 @@ pub async fn server_msg_handler(
   Ok(())
 }
 
-async fn left_sub_handler(mut message: Message, target_id: u64) -> anyhow::Result<()> {
+async fn left_sub_handler(mut message: Message, target_id: u64) -> Result<()> {
   let target = BOT_CLIENT.get_channel(target_id).await?.id();
   let sender_name = if message.profile.nick.is_some() {
     message.profile.nick.take().unwrap()

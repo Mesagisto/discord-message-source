@@ -5,6 +5,7 @@ use mesagisto_client::{cache::CACHE};
 use serde::{Deserialize, Serialize};
 use serenity::CacheAndHttp;
 use lateinit::LateInit;
+use color_eyre::eyre::Result;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct DcFile(u64, u64, ArcStr);
@@ -29,7 +30,7 @@ impl BotClient {
   pub fn init(&self, bot: Arc<CacheAndHttp>) {
     self.inner.init(bot)
   }
-  pub async fn download_file(&self, dc_file: &DcFile) -> anyhow::Result<()> {
+  pub async fn download_file(&self, dc_file: &DcFile) -> Result<()> {
     let url = dc_file.to_url();
     CACHE
       .file_by_url(&dc_file.1.to_be_bytes().to_vec(), &url)
