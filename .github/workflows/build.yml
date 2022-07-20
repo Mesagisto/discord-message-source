@@ -26,7 +26,7 @@ jobs:
         key: ${{ runner.os }}-build-${{ hashFiles('**/Cargo.toml') }}
         restore-keys: |
           ${{ runner.os }}-build
-    - name: Install stable Rust toolchain
+    - name: Install nightly Rust toolchain
       uses: actions-rs/toolchain@v1
       with:
         profile: minimal
