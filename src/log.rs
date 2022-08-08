@@ -3,17 +3,11 @@ use tracing::Level;
 use tracing_subscriber::prelude::*;
 
 pub(crate) fn init() {
-  let mut filter = tracing_subscriber::filter::Targets::new()
+  let filter = tracing_subscriber::filter::Targets::new()
     .with_target("serenity", Level::WARN)
-    .with_target("discord_message_source", Level::INFO)
-    .with_target("mesagisto_client", Level::TRACE)
+    .with_target("msgist_dc", Level::DEBUG)
+    .with_target("mesagisto_client", Level::DEBUG)
     .with_default(Level::WARN);
-
-  if cfg!(feature = "tokio-console") {
-    filter = filter
-      .with_target("tokio", Level::TRACE)
-      .with_target("runtime", Level::TRACE);
-  }
 
   let registry = tracing_subscriber::registry()
     .with(
@@ -30,9 +24,5 @@ pub(crate) fn init() {
         )),
     )
     .with(filter);
-
-  #[cfg(feature = "tokio-console")]
-  registry.with(console_subscriber::spawn()).init();
-  #[cfg(not(feature = "tokio-console"))]
   registry.init();
 }
