@@ -68,6 +68,8 @@ singleton = { branch = "master",git = "https://github.com/Itsusinn/singleton-rs.
 # singleton = { path = "/code/singleton-rs" }
 lateinit = { branch = "master", git = "https://github.com/Itsusinn/lateinit-rs.git" }
 
+self_update = { branch = "dirty-feat", git = "https://github.com/Itsusinn/self_update.git", default-features = false, features = ["archive-zip","compression-zip-deflate","rustls"] }
+
 [profile.release]
 opt-level = 'z'
 debug = 1

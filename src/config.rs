@@ -8,6 +8,7 @@ use dashmap::DashMap;
 pub struct Config {
   #[educe(Default = false)]
   pub enable: bool,
+  pub auto_update: AutoUpdateConfig,
   pub discord: DiscordConfig,
   pub proxy: ProxyConfig,
   pub nats: NatsConfig,
@@ -54,4 +55,14 @@ pub struct ProxyConfig {
 pub struct CipherConfig {
   #[educe(Default = "default")]
   pub key: ArcStr,
+}
+
+#[config_derive]
+pub struct AutoUpdateConfig {
+  #[educe(Default = true)]
+  pub enable: bool,
+  #[educe(Default = true)]
+  pub enable_proxy: bool,
+  #[educe(Default = false)]
+  pub no_confirm: bool,
 }
