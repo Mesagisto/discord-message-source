@@ -9,7 +9,9 @@ pub trait ResExt {
 impl ResExt for Res {
   #[inline]
   fn put_dc_image_id(&self, uid: &u64, file_id: &DcFile) -> Result<()> {
-    self.put_image_id(uid.to_be_bytes(), serde_cbor::to_vec(file_id)?);
+    let mut bytes = Vec::new();
+    ciborium::ser::into_writer(file_id, &mut bytes)?;
+    self.put_image_id(uid.to_be_bytes(), bytes);
     Ok(())
   }
 }

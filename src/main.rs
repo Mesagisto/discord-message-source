@@ -1,9 +1,11 @@
 #![allow(incomplete_features)]
-#![feature(capture_disjoint_fields, backtrace)]
+#![feature(capture_disjoint_fields)]
 
 use color_eyre::eyre::Result;
 use config::CONFIG;
-use mesagisto_client::MesagistoConfig;
+use dashmap::DashMap;
+use mesagisto_client::{MesagistoConfig, MesagistoConfigBuilder};
+use self_update::Status;
 use serenity::{
   client::ClientBuilder, framework::standard::StandardFramework, prelude::GatewayIntents,
 };
@@ -11,9 +13,9 @@ use smol::future::FutureExt;
 use tracing::{info, warn};
 
 use crate::{
-  bot::{DcFile, BOT_CLIENT},
+  bot::BOT_CLIENT,
   config::Config,
-  message::handlers::receive,
+  handlers::{receive, receive::packet_handler},
 };
 
 #[macro_use]
