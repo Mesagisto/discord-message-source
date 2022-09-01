@@ -22,6 +22,11 @@ extern crate educe;
 extern crate automatic_config;
 #[macro_use]
 extern crate singleton;
+#[macro_use]
+extern crate tracing;
+#[macro_use]
+extern crate rust_i18n;
+i18n!("locales");
 
 mod bot;
 mod commands;
@@ -29,9 +34,10 @@ mod config;
 mod event;
 pub mod ext;
 mod framework;
+mod handlers;
 mod log;
-mod message;
 mod net;
+mod update;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -50,15 +56,23 @@ async fn main() -> Result<()> {
 
 async fn run() -> Result<()> {
   Config::reload().await?;
+  if !&CONFIG.locale.is_empty() {
+    rust_i18n::set_locale(&CONFIG.locale);
+  } else {
+    use sys_locale::get_locale;
+    let locale = get_locale()
+      .unwrap_or_else(|| String::from("en-US"))
+      .replace('_', "-");
+    rust_i18n::set_locale(&locale);
+    info!("{}", t!("log.locale-not-configured", locale_ = &locale));
+  }
   if !CONFIG.enable {
-    warn!("Mesagisto-Bot is not enabled and is about to exit the program.");
-    warn!("To enable it, please modify the configuration file.");
-    warn!("Mesagisto-Bot未被启用, 即将退出程序。");
-    warn!("若要启用，请修改配置文件。");
+    warn!("{}", t!("log.not-enable"));
+    warn!("{}", t!("log.not-enable-helper"));
     return Ok(());
   }
-  info!(
-    "Mesagisto信使正在启动, version: v{}",
+  CONFIG.migrate();
+  if cfg!(feature = "beta") {
     env!("CARGO_PKG_VERSION")
   );
   CONFIG.migrate();
