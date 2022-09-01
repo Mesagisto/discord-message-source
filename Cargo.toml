@@ -14,6 +14,7 @@ load-path = "locales"
 default = ["color"]
 no-color = ["colored/no-color"]
 color = ["tracing-subscriber/ansi"]
+beta = []
 
 [dependencies]
 #bot
@@ -27,12 +28,15 @@ sys-locale = "0.2.1"
 rust-i18n = { branch = "main", git = "https://github.com/Itsusinn/rust-i18n.git"}
 
 # asynchronous
+futures = "0.3.21"
+tokio-util = "0.7.3"
 tokio = { version = "1.20.1", default-features = false, features = ["macros", "rt-multi-thread","signal"] }
 reqwest = { version = "0.11.11", default-features = false, features = ["rustls","rustls-tls-native-roots"] }
 smol = "1.2.5"
 sled = "0.34.7"
 
 # tools
+uuid = "1.1.2"
 url = "2.2.2"
 once_cell = "1.13.0"
 dashmap = { version = "5.3.4", features = ["serde"] }
@@ -56,12 +60,11 @@ base64-url = "1.4.13"
 serde = { version = "1.0.142", features = ["derive","rc"] }
 serde_json = "1.0.83"
 serde_yaml = "0.9.4"
-serde_cbor = "0.11.2"
+ciborium = "0.2.0"
 
 # mesagisto
-nats = { package = "async-nats", version = "0.17.0" }
-mesagisto-client = { branch = "master", git = "https://github.com/MeowCat-Studio/mesagisto-client-rs.git"}
-# mesagisto-client = { path = "../../mesagisto-client/rust" }
+# mesagisto-client = { branch = "master", git = "https://github.com/MeowCat-Studio/mesagisto-client-rs.git"}
+mesagisto-client = { path = "../../mesagisto-client/rust" }
 automatic-config = { branch = "master", git = "https://github.com/Itsusinn/automatic-config-rs.git" }
 #automatic-config = { path = "/code/automatic-config-rs" }
 singleton = { branch = "master",git = "https://github.com/Itsusinn/singleton-rs.git" }

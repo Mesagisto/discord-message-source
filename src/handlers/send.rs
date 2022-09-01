@@ -23,7 +23,8 @@ pub async fn answer_common(msg: &Message) -> Result<()> {
   if !CONFIG.bindings.contains_key(target) {
     return Ok(());
   }
-  let address = CONFIG.bindings.get(target).unwrap().clone();
+  let room_address = CONFIG.bindings.get(&target).unwrap().clone();
+
   let sender = &msg.author;
   let nick = msg.member.as_ref().and_then(|v| v.nick.clone());
   let profile = Profile {
@@ -74,9 +75,9 @@ pub async fn answer_common(msg: &Message) -> Result<()> {
     reply,
     chain,
   };
-  let packet = Packet::from(message.tl())?;
-  SERVER
-    .send(&target.to_string().into(), &address, packet, None)
-    .await?;
+
+  let room_id = SERVER.room_id(room_address);
+  let packet = Packet::new(room_id, message.tl())?;
+  SERVER.send(packet, &arcstr::literal!("mesagisto")).await?;
   Ok(())
 }

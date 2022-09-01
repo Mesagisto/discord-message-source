@@ -1,6 +1,10 @@
+use std::sync::Arc;
+
 use arcstr::ArcStr;
 use color_eyre::eyre::{Error, Result};
 use dashmap::DashMap;
+use mesagisto_client::server::SERVER;
+use uuid::Uuid;
 
 #[config_derive]
 #[derive(AutomaticConfig)]
@@ -8,6 +12,8 @@ use dashmap::DashMap;
 pub struct Config {
   #[educe(Default = false)]
   pub enable: bool,
+  #[educe(Default = "")]
+  pub locale: ArcStr,
   pub auto_update: AutoUpdateConfig,
   pub discord: DiscordConfig,
   pub proxy: ProxyConfig,
@@ -17,8 +23,30 @@ pub struct Config {
   target_address_mapper: DashMap<u64, ArcStr>,
 }
 impl Config {
-  pub fn mapper(&self, target: &u64) -> Option<ArcStr> {
+  pub fn room_address(&self, target: &u64) -> Option<ArcStr> {
     self.bindings.get(target).map(|v| v.clone())
+  }
+
+  pub fn room_id(&self, target: u64) -> Option<Arc<Uuid>> {
+    let room_address = self.room_address(&target)?;
+    Some(SERVER.room_id(room_address))
+  }
+
+  pub fn target_id(&self, room_id: Arc<Uuid>) -> Option<Vec<u64>> {
+    let entry = SERVER.room_map.iter().find(|v| v.value() == &room_id)?;
+    let room_address = entry.key();
+    let targets = self
+      .bindings
+      .iter()
+      .filter_map(|v| {
+        if v.value() == room_address {
+          Some(v.key().to_owned())
+        } else {
+          None
+        }
+      })
+      .collect::<Vec<_>>();
+    Some(targets)
   }
 
   pub fn migrate(&self) {
