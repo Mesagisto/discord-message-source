@@ -73,34 +73,52 @@ async fn run() -> Result<()> {
   }
   CONFIG.migrate();
   if cfg!(feature = "beta") {
-    env!("CARGO_PKG_VERSION")
+    std::env::set_var("GH_PRE_RELEASE", "1");
+    std::env::set_var("BYPASS_CHECK", "1");
+  }
+
+  if CONFIG.auto_update.enable {
+    tokio::task::spawn_blocking(|| {
+      match update::update() {
+        Ok(Status::UpToDate(_)) => {
+          info!("{}", t!("log.update-check-success"));
+        }
+        Ok(Status::Updated(_)) => {
+          info!("{}", t!("log.upgrade-success"));
+          std::process::exit(0);
+        }
+        Err(e) => {
+          error!("{}", e);
+        }
+      };
+    })
+    .await?;
+  }
+  let remotes = DashMap::new();
+  remotes.insert(
+    arcstr::literal!("mesagisto"),
+    "msgist://center.itsusinn.site:6996".into(),
   );
-  CONFIG.migrate();
-  MesagistoConfig::builder()
+  MesagistoConfigBuilder::default()
     .name("dc")
     .cipher_key(CONFIG.cipher.key.clone())
-    .nats_address(CONFIG.nats.address.clone())
+    .local_address("0.0.0.0:0")
+    .remote_address(remotes)
     .proxy(if CONFIG.proxy.enable {
       Some(CONFIG.proxy.address.clone())
     } else {
       None
     })
-    .photo_url_resolver(|id_pair| {
-      async {
-        let dc_file: DcFile = serde_cbor::from_slice(&id_pair.1)?;
-        Ok(dc_file.to_url())
-      }
-      .boxed()
-    })
-    .build()
+    .build()?
     .apply()
     .await?;
+  MesagistoConfig::packet_handler(|pkt| async { packet_handler(pkt).await }.boxed());
 
   let framework = StandardFramework::new()
     .configure(|c| c.prefix("/"))
     .help(&framework::HELP)
     .group(&framework::MESAGISTO_GROUP)
-    .normal_message(message::handler::message_hook);
+    .normal_message(handlers::message_hook);
 
   let http = net::build_http().await;
   let intents = {
