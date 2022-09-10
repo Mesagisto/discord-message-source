@@ -102,10 +102,7 @@ pub async fn packet_handler(pkt: Packet) -> Result<ControlFlow<Packet>> {
       return Ok(ControlFlow::Break(pkt));
     }
     Err(e) => {
-      tracing::warn!(
-        "未知的数据包类型，请更新本消息源，若已是最新请等待适配 {}",
-        e
-      );
+      tracing::warn!("未知的数据包类型，请更新本消息源，若已是最新请等待适配 {e}");
     }
   }
   Ok(ControlFlow::Continue(()))
@@ -115,14 +112,6 @@ async fn msg_handler(mut message: Message, target_id: u64, server: ArcStr) -> Re
   let target = BOT_CLIENT.get_channel(target_id).await?.id();
   let room = CONFIG.room_address(&target_id).expect("Room不存在");
   let room_id = SERVER.room_id(room);
-
-  let sender_name = if message.profile.nick.is_some() {
-    message.profile.nick.take().unwrap()
-  } else if message.profile.username.is_some() {
-    message.profile.username.take().unwrap()
-  } else {
-    base64_url::encode(&message.profile.id)
-  };
 
   let sender_name = if message.profile.nick.is_some() {
     message.profile.nick.take().unwrap()
@@ -164,7 +153,7 @@ async fn msg_handler(mut message: Message, target_id: u64, server: ArcStr) -> Re
       MessageType::Image { id, url } => {
         let path = CACHE.file(&id, &url, room_id.clone(), &server).await?;
         let receipt = target
-          .send_message(&**BOT_CLIENT, |m| m.content(format!("{}:", sender_name)))
+          .send_message(&**BOT_CLIENT, |m| m.content(format!("{sender_name}:")))
           .await?;
         DB.put_msg_id_ir_2(&target_id, receipt.id.as_u64(), &message.id)?;
         let kind = infer::get_from_path(&path).expect("file read failed when refering file type");
