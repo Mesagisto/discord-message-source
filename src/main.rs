@@ -4,12 +4,13 @@
 use color_eyre::eyre::Result;
 use config::CONFIG;
 use dashmap::DashMap;
+use futures::FutureExt;
 use mesagisto_client::{MesagistoConfig, MesagistoConfigBuilder};
 use self_update::Status;
 use serenity::{
   client::ClientBuilder, framework::standard::StandardFramework, prelude::GatewayIntents,
 };
-use smol::future::FutureExt;
+
 use tracing::{info, warn};
 
 use crate::{

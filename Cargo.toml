@@ -32,7 +32,6 @@ futures = "0.3.21"
 tokio-util = "0.7.3"
 tokio = { version = "1.20.1", default-features = false, features = ["macros", "rt-multi-thread","signal"] }
 reqwest = { version = "0.11.11", default-features = false, features = ["rustls","rustls-tls-native-roots"] }
-smol = "1.2.5"
 sled = "0.34.7"
 
 # tools
@@ -46,20 +45,20 @@ either = "1.7.0"
 infer = "0.9.0"
 yaml-rust = "0.4.5"
 linked-hash-map = "0.5.6"
-time = { version = "0.3.12", features = ["macros", "local-offset"] }
-chrono = "0.4.20"
+time = { version = "0.3.14", features = ["macros", "local-offset"] }
+chrono = "0.4.22"
 
 # error handling
-thiserror = "1.0.32"
+thiserror = "1.0.34"
 color-eyre = "0.6.2"
 
 # encoding and decoding
 base64-url = "1.4.13"
 
 # serialization
-serde = { version = "1.0.142", features = ["derive","rc"] }
-serde_json = "1.0.83"
-serde_yaml = "0.9.4"
+serde = { version = "1.0.144", features = ["derive","rc"] }
+serde_json = "1.0.85"
+serde_yaml = "0.9.11"
 ciborium = "0.2.0"
 
 # mesagisto
