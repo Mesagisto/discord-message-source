@@ -1,14 +1,24 @@
 pub mod receive;
 pub mod send;
 
-use serenity::{client::Context, framework::standard::macros::hook, model::channel::Message};
-use tracing::error;
+use mesagisto_client::ResultExt;
+use serenity::{
+  async_trait,
+  client::{Context, EventHandler},
+  model::{channel::Message, prelude::Ready},
+};
+use tracing::info;
 
 use crate::handlers::send::answer_common;
 
-#[hook]
-pub async fn message_hook(_: &Context, msg: &Message) {
-  if let Err(e) = answer_common(msg).await {
-    error!("Error in message hook {:?}", e)
+pub struct Handler;
+#[async_trait]
+impl EventHandler for Handler {
+  async fn ready(&self, _: Context, ready: Ready) {
+    info!("Bot:{} 已连接到Discord服务器!", ready.user.name);
+  }
+
+  async fn message(&self, _: Context, msg: Message) {
+    answer_common(msg).await.log();
   }
 }

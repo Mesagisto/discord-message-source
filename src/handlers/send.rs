@@ -18,7 +18,7 @@ use crate::{
   CONFIG,
 };
 
-pub async fn answer_common(msg: &Message) -> Result<()> {
+pub async fn answer_common(msg: Message) -> Result<()> {
   let target = msg.channel_id.as_u64();
   if !CONFIG.bindings.contains_key(target) {
     return Ok(());
