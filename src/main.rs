@@ -10,7 +10,6 @@ use self_update::Status;
 use serenity::{
   client::ClientBuilder, framework::standard::StandardFramework, prelude::GatewayIntents,
 };
-
 use tracing::{info, warn};
 
 use crate::{
@@ -34,7 +33,6 @@ i18n!("locales");
 mod bot;
 mod commands;
 mod config;
-mod event;
 pub mod ext;
 mod framework;
 mod handlers;
@@ -120,8 +118,8 @@ async fn run() -> Result<()> {
   let framework = StandardFramework::new()
     .configure(|c| c.prefix("/"))
     .help(&framework::HELP)
-    .group(&framework::MESAGISTO_GROUP)
-    .normal_message(handlers::message_hook);
+    .group(&framework::MESAGISTO_GROUP);
+  // .normal_message(handlers::message_hook);
 
   let http = net::build_http().await;
   let intents = {
@@ -134,7 +132,7 @@ async fn run() -> Result<()> {
     intents
   };
   let mut client = ClientBuilder::new_with_http(http, intents)
-    .event_handler(event::Handler)
+    .event_handler(handlers::Handler)
     .framework(framework)
     .await?;
   BOT_CLIENT.init(client.cache_and_http.clone());
