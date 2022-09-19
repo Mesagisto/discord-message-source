@@ -1,11 +1,12 @@
 pub mod receive;
 pub mod send;
 
+use crate::BOT_CLIENT;
 use mesagisto_client::ResultExt;
 use serenity::{
   async_trait,
   client::{Context, EventHandler},
-  model::{channel::Message, prelude::Ready},
+  model::{channel::Message, prelude::Ready}
 };
 use tracing::info;
 
@@ -19,6 +20,9 @@ impl EventHandler for Handler {
   }
 
   async fn message(&self, _: Context, msg: Message) {
+    if msg.is_own(BOT_CLIENT.get_cache()) {
+      return;
+    };
     answer_common(msg).await.log();
   }
 }
