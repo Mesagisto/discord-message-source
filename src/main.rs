@@ -1,6 +1,3 @@
-#![allow(incomplete_features)]
-#![feature(capture_disjoint_fields)]
-
 use color_eyre::eyre::Result;
 use config::CONFIG;
 use dashmap::DashMap;
@@ -26,9 +23,6 @@ extern crate automatic_config;
 extern crate singleton;
 #[macro_use]
 extern crate tracing;
-#[macro_use]
-extern crate rust_i18n;
-i18n!("locales");
 
 mod bot;
 mod commands;
@@ -36,6 +30,7 @@ mod config;
 pub mod ext;
 mod framework;
 mod handlers;
+mod i18n;
 mod log;
 mod net;
 mod update;
@@ -57,54 +52,48 @@ async fn main() -> Result<()> {
 
 async fn run() -> Result<()> {
   Config::reload().await?;
-  if !&CONFIG.locale.is_empty() {
-    rust_i18n::set_locale(&CONFIG.locale);
-  } else {
-    use sys_locale::get_locale;
-    let locale = get_locale()
-      .unwrap_or_else(|| String::from("en-US"))
-      .replace('_', "-");
-    rust_i18n::set_locale(&locale);
-    info!("{}", t!("log.locale-not-configured", locale_ = &locale));
+  if !CONFIG.locale.is_empty() {
+    let locale = Locale::new(&*CONFIG.locale)?;
+    Locale::set_global_default(locale);
   }
+  Lazy::force(&i18n::LANGUAGE_LOADER);
+
   if !CONFIG.enable {
-    warn!("{}", t!("log.not-enable"));
-    warn!("{}", t!("log.not-enable-helper"));
+    warn!("log-not-enable");
+    warn!("log-not-enable-helper");
     return Ok(());
   }
   CONFIG.migrate();
-  if cfg!(feature = "beta") {
-    std::env::set_var("GH_PRE_RELEASE", "1");
-    std::env::set_var("BYPASS_CHECK", "1");
-  }
+
 
   if CONFIG.auto_update.enable {
     tokio::task::spawn_blocking(|| {
       match update::update() {
         Ok(Status::UpToDate(_)) => {
-          info!("{}", t!("log.update-check-success"));
+          info!("log-update-check-success");
         }
         Ok(Status::Updated(_)) => {
-          info!("{}", t!("log.upgrade-success"));
+          info!("log-upgrade-success");
           std::process::exit(0);
         }
         Err(e) => {
-          error!("{}", e);
+          tracing::error!("{}", e);
         }
       };
     })
     .await?;
   }
-  let remotes = DashMap::new();
-  remotes.insert(
-    arcstr::literal!("mesagisto"),
-    "msgist://center.itsusinn.site:6996".into(),
-  );
+
   MesagistoConfigBuilder::default()
     .name("dc")
     .cipher_key(CONFIG.cipher.key.clone())
-    .local_address("0.0.0.0:0")
-    .remote_address(remotes)
+    .remote_address(CONFIG.deref().centers.to_owned())
+    .skip_verify(CONFIG.tls.skip_verify)
+    .custom_cert(if CONFIG.tls.custom_cert.is_empty(){
+      None
+    }else{
+      Some(CONFIG.deref().tls.custom_cert.to_owned())
+    })
     .proxy(if CONFIG.proxy.enable {
       Some(CONFIG.proxy.address.clone())
     } else {
@@ -145,8 +134,8 @@ async fn run() -> Result<()> {
 
   tokio::signal::ctrl_c().await?;
   shard_manager.lock().await.shutdown_all().await;
-  info!("Mesagisto信使 正在关闭");
-  info!("正在保存配置文件");
+  info!("log-shutdown");
+  CONFIG.save().await.expect("保存配置文件失败");
   CONFIG.save().await?;
   Ok(())
 }

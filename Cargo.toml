@@ -69,8 +69,14 @@ automatic-config = { branch = "master", git = "https://github.com/Itsusinn/autom
 singleton = { branch = "master",git = "https://github.com/Itsusinn/singleton-rs.git" }
 # singleton = { path = "/code/singleton-rs" }
 lateinit = { branch = "master", git = "https://github.com/Itsusinn/lateinit-rs.git" }
+self_update = { branch = "proxy", git = "https://github.com/Itsusinn/self_update.git", default-features = false, features = ["archive-zip","compression-zip-deflate","rustls"] }
 
-self_update = { branch = "dirty-feat", git = "https://github.com/Itsusinn/self_update.git", default-features = false, features = ["archive-zip","compression-zip-deflate","rustls"] }
+# i18n
+i18n-embed = { version = "0.13.4", features = ["fluent-system", "desktop-requester"]}
+i18n-embed-fl = "0.6.4"
+rust-embed = "6.4.2"
+locale_config = "0.3.0"
+
 
 [profile.release]
 opt-level = 'z'
