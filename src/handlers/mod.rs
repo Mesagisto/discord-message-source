@@ -1,16 +1,15 @@
 pub mod receive;
 pub mod send;
 
-use crate::BOT_CLIENT;
 use mesagisto_client::ResultExt;
 use serenity::{
   async_trait,
   client::{Context, EventHandler},
-  model::{channel::Message, prelude::Ready}
+  model::{channel::Message, prelude::Ready},
 };
 use tracing::info;
 
-use crate::handlers::send::answer_common;
+use crate::{handlers::send::answer_common, BOT_CLIENT};
 
 pub struct Handler;
 #[async_trait]

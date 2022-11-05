@@ -1,17 +1,18 @@
+use std::ops::Deref;
+
 use color_eyre::eyre::Result;
-use config::CONFIG;
-use dashmap::DashMap;
-use futures::FutureExt;
+use futures_util::FutureExt;
+use locale_config::Locale;
 use mesagisto_client::{MesagistoConfig, MesagistoConfigBuilder};
+use once_cell::sync::Lazy;
 use self_update::Status;
 use serenity::{
   client::ClientBuilder, framework::standard::StandardFramework, prelude::GatewayIntents,
 };
-use tracing::{info, warn};
 
 use crate::{
   bot::BOT_CLIENT,
-  config::Config,
+  config::{CONFIG,Config},
   handlers::{receive, receive::packet_handler},
 };
 

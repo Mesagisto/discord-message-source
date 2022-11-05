@@ -17,10 +17,11 @@ pub struct Config {
   pub auto_update: AutoUpdateConfig,
   pub discord: DiscordConfig,
   pub proxy: ProxyConfig,
-  pub nats: NatsConfig,
   pub cipher: CipherConfig,
   pub bindings: DashMap<u64, ArcStr>,
-  target_address_mapper: DashMap<u64, ArcStr>,
+  pub tls: TlsConfig,
+  pub centers: Arc<DashMap<ArcStr, ArcStr>>,
+
 }
 impl Config {
   pub fn room_address(&self, target: &u64) -> Option<ArcStr> {
@@ -50,19 +51,10 @@ impl Config {
   }
 
   pub fn migrate(&self) {
-    for pair in &self.target_address_mapper {
-      self.bindings.insert(*pair.key(), pair.value().clone());
-    }
-    self.target_address_mapper.clear();
+    self.centers.insert("mesagisto".into(), "wss://center.mesagisto.org".into());
   }
 }
 
-#[config_derive]
-pub struct NatsConfig {
-  // pattern: "nats://{token}@{host}:{port}"
-  #[educe(Default = "nats://nats.mesagisto.org:4222")]
-  pub address: ArcStr,
-}
 
 #[config_derive]
 pub struct DiscordConfig {
@@ -93,4 +85,11 @@ pub struct AutoUpdateConfig {
   pub enable_proxy: bool,
   #[educe(Default = false)]
   pub no_confirm: bool,
+}
+
+#[config_derive]
+pub struct TlsConfig {
+  #[educe(Default = false)]
+  pub skip_verify: bool,
+  pub custom_cert: ArcStr
 }
