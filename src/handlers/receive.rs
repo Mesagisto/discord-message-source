@@ -2,7 +2,7 @@ use std::ops::ControlFlow;
 
 use arcstr::ArcStr;
 use color_eyre::eyre::Result;
-use futures::future::join_all;
+use futures_util::future::join_all;
 use mesagisto_client::{
   cache::CACHE,
   data::{
