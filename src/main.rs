@@ -89,10 +89,11 @@ async fn run() -> Result<()> {
     .name("dc")
     .cipher_key(CONFIG.cipher.key.clone())
     .remote_address(CONFIG.deref().centers.to_owned())
+    .same_side_deliver(true)
     .skip_verify(CONFIG.tls.skip_verify)
     .custom_cert(if CONFIG.tls.custom_cert.is_empty(){
       None
-    }else{
+    } else {
       Some(CONFIG.deref().tls.custom_cert.to_owned())
     })
     .proxy(if CONFIG.proxy.enable {
@@ -136,7 +137,6 @@ async fn run() -> Result<()> {
   tokio::signal::ctrl_c().await?;
   shard_manager.lock().await.shutdown_all().await;
   info!("log-shutdown");
-  CONFIG.save().await.expect("保存配置文件失败");
   CONFIG.save().await?;
   Ok(())
 }
