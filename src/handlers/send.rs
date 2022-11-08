@@ -74,6 +74,7 @@ pub async fn answer_common(msg: Message) -> Result<()> {
     id: msg.id.as_u64().to_be_bytes().to_vec(),
     reply,
     chain,
+    from: target.to_be_bytes().to_vec(),
   };
 
   let room_id = SERVER.room_id(room_address);
