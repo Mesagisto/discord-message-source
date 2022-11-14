@@ -68,7 +68,9 @@ pub async fn packet_handler(pkt: Packet) -> Result<ControlFlow<Packet>> {
       if let Some(targets) = CONFIG.target_id(pkt.room_id.clone()) {
         if targets.len() == 1 {
           let target = targets[0];
-          msg_handler(message, target, "mesagisto".into()).await?;
+          if target.to_be_bytes() != *message.from {
+            msg_handler(message, target, "mesagisto".into()).await?;
+          }
         } else {
           let mut futs = Vec::new();
           for target in targets {

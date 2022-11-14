@@ -59,8 +59,8 @@ serde_yaml = "0.9.14"
 ciborium = "0.2.0"
 
 # mesagisto
-# mesagisto-client = { branch = "master", git = "https://github.com/MeowCat-Studio/mesagisto-client-rs.git"}
-mesagisto-client = { path = "../../mesagisto-client/rust" }
+mesagisto-client = { branch = "master", git = "https://github.com/MeowCat-Studio/mesagisto-client-rs.git"}
+#mesagisto-client = { path = "../../mesagisto-client/rust" }
 automatic-config = { branch = "master", git = "https://github.com/Itsusinn/automatic-config-rs.git" }
 #automatic-config = { path = "/code/automatic-config-rs" }
 singleton = { branch = "master",git = "https://github.com/Itsusinn/singleton-rs.git" }
