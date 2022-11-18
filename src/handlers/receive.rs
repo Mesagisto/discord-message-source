@@ -4,7 +4,7 @@ use arcstr::ArcStr;
 use color_eyre::eyre::Result;
 use futures_util::future::join_all;
 use mesagisto_client::{
-  cache::CACHE,
+  res::RES,
   data::{
     events::Event,
     message::{Message, MessageType},
@@ -155,7 +155,28 @@ async fn msg_handler(mut message: Message, target_id: u64, server: ArcStr) -> Re
         DB.put_msg_id_1(&target_id, &message.id, receipt.id.as_u64())?;
       }
       MessageType::Image { id, url } => {
-        let path = CACHE.file(&id, &url, room_id.clone(), &server).await?;
+        let path = RES.file(&id, &url, room_id.clone(), &server).await?;
+        let receipt = target
+          .send_message(&**BOT_CLIENT, |m| m.content(format!("{sender_name}:")))
+          .await?;
+        DB.put_msg_id_ir_2(&target_id, receipt.id.as_u64(), &message.id)?;
+        let kind = infer::get_from_path(&path).expect("file read failed when refering file type");
+
+        let filename = match kind {
+          Some(ty) => format!("{:?}.{}", path.file_name().unwrap(), ty.extension()),
+          None => path.file_name().unwrap().to_string_lossy().to_string(),
+        };
+        let attachment = AttachmentType::File {
+          file: &tokio::fs::File::open(&path).await.unwrap(),
+          filename,
+        };
+        let receipt = target
+          .send_message(&**BOT_CLIENT, |m| m.add_file(attachment))
+          .await?;
+        DB.put_msg_id_1(&target_id, &message.id, receipt.id.as_u64())?;
+      }
+      MessageType::Sticker { id, url } => {
+        let path = RES.file(&id, &url, room_id.clone(), &server).await?;
         let receipt = target
           .send_message(&**BOT_CLIENT, |m| m.content(format!("{sender_name}:")))
           .await?;

@@ -3,7 +3,7 @@ use std::{ops::Deref, sync::Arc};
 use arcstr::ArcStr;
 use color_eyre::eyre::Result;
 use lateinit::LateInit;
-use mesagisto_client::cache::CACHE;
+use mesagisto_client::res::RES;
 use serde::{Deserialize, Serialize};
 use serenity::{client::Cache, CacheAndHttp};
 
@@ -38,7 +38,7 @@ impl BotClient {
 
   pub async fn download_file(&self, dc_file: &DcFile) -> Result<()> {
     let url = dc_file.to_url();
-    CACHE
+    RES
       .file_by_url(&dc_file.1.to_be_bytes().to_vec(), &url)
       .await?;
     Ok(())
