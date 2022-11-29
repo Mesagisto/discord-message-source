@@ -1,4 +1,5 @@
 use arcstr::ArcStr;
+use mesagisto_client::ResultExt;
 use serenity::{
   client::Context,
   framework::standard::{macros::command, Args, CommandResult},
@@ -38,12 +39,14 @@ pub async fn bind(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult
         .reply(ctx, format!("成功重新绑定当前频道的信使地址到{}", address))
         .await?;
       handlers::receive::change(&before, &ArcStr::from(address)).await?;
+      CONFIG.save().await.log();
     }
     None => {
       msg
         .reply(ctx, format!("成功绑定当前频道的信使地址到{}", address))
         .await?;
       handlers::receive::add(&ArcStr::from(address)).await?;
+      CONFIG.save().await.log();
     }
   };
   Ok(())
@@ -58,6 +61,7 @@ pub async fn unbind(ctx: &Context, msg: &Message) -> CommandResult {
     Some(before) => {
       msg.reply(ctx, "成功解绑当前频道的信使地址").await?;
       handlers::receive::del(&before.1).await?;
+      CONFIG.save().await.log();
     }
     None => {
       msg.reply(ctx, "当前频道没有设置信使地址").await?;
