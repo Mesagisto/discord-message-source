@@ -51,7 +51,7 @@ impl Config {
   }
 
   pub fn migrate(&self) {
-    self.centers.insert("mesagisto".into(), "wss://center.mesagisto.org".into());
+    self.centers.insert("mesagisto".into(), "wss://builtin".into());
   }
 }
 

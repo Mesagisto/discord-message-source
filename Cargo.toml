@@ -27,14 +27,14 @@ colored = "2.0.0"
 
 # asynchronous
 futures-util = "0.3.25"
-tokio = { version = "1.21.2", default-features = false, features = ["macros", "rt-multi-thread","signal"] }
+tokio = { version = "1.23.0", default-features = false, features = ["macros", "rt-multi-thread","signal"] }
 reqwest = { version = "0.11.13", default-features = false, features = ["rustls","rustls-tls-native-roots"] }
 sled = "0.34.7"
 
 # tools
 uuid = "1.2.2"
 url = "2.3.1"
-once_cell = "1.16.0"
+once_cell = "1.17.0"
 dashmap = { version = "5.4.0", features = ["serde"] }
 educe = { version = "0.4.20", default-features = false, features = ["Default"] }
 arcstr = { version = "1.1.5", features = ["serde"] }
@@ -46,16 +46,16 @@ time = { version = "0.3.17", features = ["macros", "local-offset"] }
 chrono = "0.4.23"
 
 # error handling
-thiserror = "1.0.37"
+thiserror = "1.0.38"
 color-eyre = "0.6.2"
 
 # encoding and decoding
 base64-url = "1.4.13"
 
 # serialization
-serde = { version = "1.0.147", features = ["derive","rc"] }
-serde_json = "1.0.88"
-serde_yaml = "0.9.14"
+serde = { version = "1.0.152", features = ["derive","rc"] }
+serde_json = "1.0.91"
+serde_yaml = "0.9.16"
 ciborium = "0.2.0"
 
 # mesagisto
