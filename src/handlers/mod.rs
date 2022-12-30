@@ -19,7 +19,7 @@ impl EventHandler for Handler {
   }
 
   async fn message(&self, _: Context, msg: Message) {
-    if msg.is_own(BOT_CLIENT.get_cache()) {
+    if msg.is_own(BOT_CLIENT.cache()) {
       return;
     };
     answer_common(msg).await.log();

@@ -1,4 +1,4 @@
-use std::ops::ControlFlow;
+use std::{ops::ControlFlow, num::NonZeroU64};
 
 use arcstr::ArcStr;
 use color_eyre::eyre::Result;
@@ -14,10 +14,10 @@ use mesagisto_client::{
   server::SERVER,
   EitherExt, ResultExt,
 };
-use serenity::model::{
-  channel::{AttachmentType, MessageReference},
+use serenity::{model::{
+  channel::MessageReference,
   id::{ChannelId, MessageId},
-};
+}, builder::{CreateMessage, CreateAttachment}};
 use tracing::trace;
 
 use crate::{
@@ -113,7 +113,7 @@ pub async fn packet_handler(pkt: Packet) -> Result<ControlFlow<Packet>> {
 }
 
 async fn msg_handler(mut message: Message, target_id: u64, server: ArcStr) -> Result<()> {
-  let target = BOT_CLIENT.get_channel(target_id).await?.id();
+  let target = BOT_CLIENT.get_channel(ChannelId(NonZeroU64::new(target_id).unwrap())).await?.id();
   let room = CONFIG.room_address(&target_id).expect("Room不存在");
   let room_id = SERVER.room_id(room);
 
@@ -134,67 +134,61 @@ async fn msg_handler(mut message: Message, target_id: u64, server: ArcStr) -> Re
           let local_id = DB.get_msg_id_1(&target_id, reply_to)?;
           match local_id {
             Some(local_id) => {
-              let refer = MessageReference::from((ChannelId(target_id), MessageId::from(local_id)));
+              let refer = MessageReference::from((ChannelId(NonZeroU64::new(target_id).unwrap()), MessageId::from(local_id)));
               target
-                .send_message(&**BOT_CLIENT, |m| {
-                  m.reference_message(refer).content(content)
-                })
+                .send_message(&**BOT_CLIENT, CreateMessage::new().content(content).reference_message(refer))
                 .await
             }
             None => {
               target
-                .send_message(&**BOT_CLIENT, |m| m.content(content))
+                .send_message(&**BOT_CLIENT, CreateMessage::new().content(content))
                 .await
             }
           }
         } else {
           target
-            .send_message(&**BOT_CLIENT, |m| m.content(content))
+            .send_message(&**BOT_CLIENT, CreateMessage::new().content(content))
             .await
         }?;
-        DB.put_msg_id_1(&target_id, &message.id, receipt.id.as_u64())?;
+        DB.put_msg_id_1(&target_id, &message.id, &receipt.id.0.get())?;
       }
       MessageType::Image { id, url } => {
         let path = RES.file(&id, &url, room_id.clone(), &server).await?;
         let receipt = target
-          .send_message(&**BOT_CLIENT, |m| m.content(format!("{sender_name}:")))
+          .send_message(&**BOT_CLIENT, CreateMessage::new().content(format!("{sender_name}:")))
           .await?;
-        DB.put_msg_id_ir_2(&target_id, receipt.id.as_u64(), &message.id)?;
+        DB.put_msg_id_ir_2(&target_id, &receipt.id.0.get(), &message.id)?;
         let kind = infer::get_from_path(&path).expect("file read failed when refering file type");
 
         let filename = match kind {
           Some(ty) => format!("{:?}.{}", path.file_name().unwrap(), ty.extension()),
           None => path.file_name().unwrap().to_string_lossy().to_string(),
         };
-        let attachment = AttachmentType::File {
-          file: &tokio::fs::File::open(&path).await.unwrap(),
-          filename,
-        };
+        let attachment =  CreateAttachment::file(&tokio::fs::File::open(&path).await.unwrap(), filename).await?;
+
         let receipt = target
-          .send_message(&**BOT_CLIENT, |m| m.add_file(attachment))
+          .send_message(&**BOT_CLIENT, CreateMessage::new().add_file(attachment))
           .await?;
-        DB.put_msg_id_1(&target_id, &message.id, receipt.id.as_u64())?;
+        DB.put_msg_id_1(&target_id, &message.id, &receipt.id.0.get())?;
       }
       MessageType::Sticker { id, url } => {
         let path = RES.file(&id, &url, room_id.clone(), &server).await?;
         let receipt = target
-          .send_message(&**BOT_CLIENT, |m| m.content(format!("{sender_name}:")))
+          .send_message(&**BOT_CLIENT, CreateMessage::new().content(format!("{sender_name}:")))
           .await?;
-        DB.put_msg_id_ir_2(&target_id, receipt.id.as_u64(), &message.id)?;
+        DB.put_msg_id_ir_2(&target_id, &receipt.id.0.get(), &message.id)?;
         let kind = infer::get_from_path(&path).expect("file read failed when refering file type");
 
         let filename = match kind {
           Some(ty) => format!("{:?}.{}", path.file_name().unwrap(), ty.extension()),
           None => path.file_name().unwrap().to_string_lossy().to_string(),
         };
-        let attachment = AttachmentType::File {
-          file: &tokio::fs::File::open(&path).await.unwrap(),
-          filename,
-        };
+        let attachment =  CreateAttachment::file(&tokio::fs::File::open(&path).await.unwrap(), filename).await?;
+
         let receipt = target
-          .send_message(&**BOT_CLIENT, |m| m.add_file(attachment))
+          .send_message(&**BOT_CLIENT, CreateMessage::new().add_file(attachment))
           .await?;
-        DB.put_msg_id_1(&target_id, &message.id, receipt.id.as_u64())?;
+        DB.put_msg_id_1(&target_id, &message.id, &receipt.id.0.get())?;
       }
       _ => {}
     }

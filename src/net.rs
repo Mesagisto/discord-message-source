@@ -14,7 +14,6 @@ pub async fn build_http() -> serenity::http::Http {
       .expect("Failed to create reqwest::Client builder");
     HttpBuilder::new(CONFIG.discord.token.clone())
       .proxy(CONFIG.proxy.address.as_str())
-      .expect("Failed to create proxy for serenity")
       .client(builder)
       .build()
   } else {

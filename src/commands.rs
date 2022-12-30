@@ -32,7 +32,7 @@ pub async fn bind(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult
   let address: ArcStr = args.single::<String>().unwrap().into();
   match CONFIG
     .bindings
-    .insert(*msg.channel_id.as_u64(), address.clone())
+    .insert(msg.channel_id.0.get(), address.clone())
   {
     Some(before) => {
       msg
@@ -56,8 +56,8 @@ pub async fn bind(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult
 #[required_permissions("ADMINISTRATOR")]
 #[description = "Unbind mesagisto-channel for current channel | 删除当前频道的信使频道"]
 pub async fn unbind(ctx: &Context, msg: &Message) -> CommandResult {
-  let chat_id = msg.channel_id.as_u64();
-  match CONFIG.bindings.remove(chat_id) {
+  let chat_id = msg.channel_id.0.get();
+  match CONFIG.bindings.remove(&chat_id) {
     Some(before) => {
       msg.reply(ctx, "成功解绑当前频道的信使地址").await?;
       handlers::receive::del(&before.1).await?;

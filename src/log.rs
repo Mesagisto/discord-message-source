@@ -7,6 +7,8 @@ pub(crate) fn init() {
     .with_target("serenity", Level::WARN)
     .with_target("msgist_dc", Level::DEBUG)
     .with_target("mesagisto_client", Level::DEBUG)
+    .with_target("tokio_tungstenite", Level::DEBUG)
+    .with_target("tungstenite", Level::DEBUG)
     .with_default(Level::WARN);
 
   let registry = tracing_subscriber::registry()

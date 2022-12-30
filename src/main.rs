@@ -107,9 +107,10 @@ async fn run() -> Result<()> {
   MesagistoConfig::packet_handler(|pkt| async { packet_handler(pkt).await }.boxed());
 
   let framework = StandardFramework::new()
-    .configure(|c| c.prefix("/"))
     .help(&framework::HELP)
     .group(&framework::MESAGISTO_GROUP);
+  framework.configure(|c| c.prefix("/"));
+
   // .normal_message(handlers::message_hook);
 
   let http = net::build_http().await;
@@ -126,16 +127,16 @@ async fn run() -> Result<()> {
     .event_handler(handlers::Handler)
     .framework(framework)
     .await?;
-  BOT_CLIENT.init(client.cache_and_http.clone());
 
-  let shard_manager = client.shard_manager.clone();
+  BOT_CLIENT.init(client.http.clone(),client.cache.clone());
+
   receive::recover().await?;
   tokio::spawn(async move {
     client.start().await.expect("Client error");
   });
-
+  
   tokio::signal::ctrl_c().await?;
-  shard_manager.lock().await.shutdown_all().await;
+
   info!("log-shutdown");
   CONFIG.save().await?;
   Ok(())

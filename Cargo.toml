@@ -15,10 +15,10 @@ default = ["color"]
 no-color = ["colored/no-color"]
 color = ["tracing-subscriber/ansi"]
 
-
 [dependencies]
-#bot
-serenity = { version = "0.11.5", features = ["gateway"] }
+serenity = { branch = "ws-proxy", git = "https://github.com/Itsusinn/serenity.git"}
+
+# serenity = { path = "/home/itsusinn/Workspace/Clone/serenity" }
 
 # logging
 tracing= "0.1.37"

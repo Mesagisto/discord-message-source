@@ -5,7 +5,7 @@ use color_eyre::eyre::Result;
 use lateinit::LateInit;
 use mesagisto_client::res::RES;
 use serde::{Deserialize, Serialize};
-use serenity::{client::Cache, CacheAndHttp};
+use serenity::{all::Http, client::Cache};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct DcFile(u64, u64, ArcStr);
@@ -25,17 +25,18 @@ impl DcFile {
 
 #[derive(Singleton, Default)]
 pub struct BotClient {
-  inner: LateInit<Arc<CacheAndHttp>>,
+  inner: LateInit<Arc<Http>>,
+  cache: LateInit<Arc<Cache>>,
 }
 impl BotClient {
-  pub fn init(&self, bot: Arc<CacheAndHttp>) {
-    self.inner.init(bot)
+  pub fn init(&self, bot: Arc<Http>, cache: Arc<Cache>) {
+    self.inner.init(bot);
+    self.cache.init(cache);
   }
 
-  pub fn get_cache(&self) -> &Arc<Cache> {
-    &self.inner.cache
+  pub fn cache(&self) -> Arc<Cache> {
+    self.cache.clone()
   }
-
   pub async fn download_file(&self, dc_file: &DcFile) -> Result<()> {
     let url = dc_file.to_url();
     RES
@@ -45,9 +46,9 @@ impl BotClient {
   }
 }
 impl Deref for BotClient {
-  type Target = Arc<serenity::http::Http>;
+  type Target = Arc<Http>;
 
   fn deref(&self) -> &Self::Target {
-    &self.inner.http
+    &self.inner
   }
 }
