@@ -36,7 +36,7 @@ mod log;
 mod net;
 mod update;
 
-#[tokio::main]
+#[tokio::main(flavor = "multi_thread")]
 async fn main() -> Result<()> {
   if cfg!(feature = "color") {
     color_eyre::install()?;
