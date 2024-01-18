@@ -39,7 +39,7 @@ pub async fn answer_common(msg: Message) -> Result<()> {
     })
   }
   // fixme image group
-  if let Some(attach) = msg.attachments.get(0) {
+  if let Some(attach) = msg.attachments.first() {
     match &attach.content_type {
       Some(ty) => {
         if ty.starts_with("image") {

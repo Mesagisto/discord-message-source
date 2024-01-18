@@ -38,14 +38,14 @@ pub async fn bind(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult
       msg
         .reply(ctx, format!("成功重新绑定当前频道的信使地址到{}", address))
         .await?;
-      handlers::receive::change(&before, &ArcStr::from(address)).await?;
+      handlers::receive::change(&before, &address).await?;
       CONFIG.save().await.log();
     }
     None => {
       msg
         .reply(ctx, format!("成功绑定当前频道的信使地址到{}", address))
         .await?;
-      handlers::receive::add(&ArcStr::from(address)).await?;
+      handlers::receive::add(&address).await?;
       CONFIG.save().await.log();
     }
   };

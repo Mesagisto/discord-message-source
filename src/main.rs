@@ -51,7 +51,7 @@ async fn main() -> Result<()> {
 async fn run() -> Result<()> {
   Config::reload().await?;
   if !CONFIG.locale.is_empty() {
-    let locale = Locale::new(&*CONFIG.locale)?;
+    let locale = Locale::new(&CONFIG.locale)?;
     Locale::set_global_default(locale);
   }
   Lazy::force(&i18n::LANGUAGE_LOADER);
