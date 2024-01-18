@@ -3,12 +3,13 @@ use std::sync::Arc;
 use arcstr::ArcStr;
 use color_eyre::eyre::{Error, Result};
 use dashmap::DashMap;
+use figment_wrapper::{figment_derive, FigmentWrapper};
 use mesagisto_client::server::SERVER;
 use uuid::Uuid;
 
-#[config_derive]
-#[derive(AutomaticConfig)]
-#[location = "config/dc.yml"]
+#[figment_derive]
+#[derive(FigmentWrapper)]
+#[location= "config/dc.yml"]
 pub struct Config {
   #[educe(Default = false)]
   pub enable: bool,
@@ -49,20 +50,16 @@ impl Config {
       .collect::<Vec<_>>();
     Some(targets)
   }
-
-  pub fn migrate(&self) {
-    self.centers.insert("mesagisto".into(), "wss://builtin".into());
-  }
 }
 
 
-#[config_derive]
+#[figment_derive]
 pub struct DiscordConfig {
   #[educe(Default = "BOT.TOKEN")]
   pub token: String,
 }
 
-#[config_derive]
+#[figment_derive]
 pub struct ProxyConfig {
   #[educe(Default = false)]
   pub enable: bool,
@@ -71,13 +68,13 @@ pub struct ProxyConfig {
   pub address: ArcStr,
 }
 
-#[config_derive]
+#[figment_derive]
 pub struct CipherConfig {
   #[educe(Default = "default")]
   pub key: ArcStr,
 }
 
-#[config_derive]
+#[figment_derive]
 pub struct AutoUpdateConfig {
   #[educe(Default = true)]
   pub enable: bool,
@@ -87,7 +84,7 @@ pub struct AutoUpdateConfig {
   pub no_confirm: bool,
 }
 
-#[config_derive]
+#[figment_derive]
 pub struct TlsConfig {
   #[educe(Default = false)]
   pub skip_verify: bool,

@@ -18,12 +18,9 @@ use crate::{
 
 #[macro_use]
 extern crate educe;
-#[macro_use]
-extern crate automatic_config;
+
 #[macro_use]
 extern crate singleton;
-#[macro_use]
-extern crate tracing;
 
 mod bot;
 mod commands;
@@ -64,8 +61,7 @@ async fn run() -> Result<()> {
     warn!("log-not-enable-helper");
     return Ok(());
   }
-  CONFIG.migrate();
-
+  CONFIG.save().await?;
 
   if CONFIG.auto_update.enable {
     tokio::task::spawn_blocking(|| {
@@ -109,7 +105,8 @@ async fn run() -> Result<()> {
   let framework = StandardFramework::new()
     .help(&framework::HELP)
     .group(&framework::MESAGISTO_GROUP);
-  framework.configure(|c| c.prefix("/"));
+  let conf = serenity::framework::standard::Configuration::default().prefix("/");
+  framework.configure(conf);
 
   // .normal_message(handlers::message_hook);
 
@@ -134,7 +131,7 @@ async fn run() -> Result<()> {
   tokio::spawn(async move {
     client.start().await.expect("Client error");
   });
-  
+
   tokio::signal::ctrl_c().await?;
 
   info!("log-shutdown");

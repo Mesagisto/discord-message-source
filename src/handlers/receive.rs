@@ -1,4 +1,4 @@
-use std::{ops::ControlFlow, num::NonZeroU64};
+use std::ops::ControlFlow;
 
 use arcstr::ArcStr;
 use color_eyre::eyre::Result;
@@ -62,7 +62,7 @@ pub async fn del(room_address: &ArcStr) -> Result<()> {
 }
 
 pub async fn packet_handler(pkt: Packet) -> Result<ControlFlow<Packet>> {
-  debug!("recv msg pkt from {:#?}", pkt.room_id);
+  tracing::debug!("recv msg pkt from {:#?}", pkt.room_id);
   match pkt.decrypt() {
     Ok(either::Either::Left(message)) => {
       if let Some(targets) = CONFIG.target_id(pkt.room_id.clone()) {
@@ -102,7 +102,7 @@ pub async fn packet_handler(pkt: Packet) -> Result<ControlFlow<Packet>> {
       }
     }
     Ok(either::Either::Right(event)) => {
-      debug!("recv event pkt {:#?}", event);
+      tracing::debug!("recv event pkt {:#?}", event);
       return Ok(ControlFlow::Break(pkt));
     }
     Err(e) => {
@@ -113,7 +113,7 @@ pub async fn packet_handler(pkt: Packet) -> Result<ControlFlow<Packet>> {
 }
 
 async fn msg_handler(mut message: Message, target_id: u64, server: ArcStr) -> Result<()> {
-  let target = BOT_CLIENT.get_channel(ChannelId(NonZeroU64::new(target_id).unwrap())).await?.id();
+  let target = BOT_CLIENT.get_channel(ChannelId::from(target_id)).await?.id();
   let room = CONFIG.room_address(&target_id).expect("Room不存在");
   let room_id = SERVER.room_id(room);
 
@@ -134,7 +134,7 @@ async fn msg_handler(mut message: Message, target_id: u64, server: ArcStr) -> Re
           let local_id = DB.get_msg_id_1(&target_id, reply_to)?;
           match local_id {
             Some(local_id) => {
-              let refer = MessageReference::from((ChannelId(NonZeroU64::new(target_id).unwrap()), MessageId::from(local_id)));
+              let refer = MessageReference::from((ChannelId::from(target_id), MessageId::from(local_id)));
               target
                 .send_message(&**BOT_CLIENT, CreateMessage::new().content(content).reference_message(refer))
                 .await
@@ -150,14 +150,14 @@ async fn msg_handler(mut message: Message, target_id: u64, server: ArcStr) -> Re
             .send_message(&**BOT_CLIENT, CreateMessage::new().content(content))
             .await
         }?;
-        DB.put_msg_id_1(&target_id, &message.id, &receipt.id.0.get())?;
+        DB.put_msg_id_1(&target_id, &message.id, &receipt.id.get())?;
       }
       MessageType::Image { id, url } => {
         let path = RES.file(&id, &url, room_id.clone(), &server).await?;
         let receipt = target
           .send_message(&**BOT_CLIENT, CreateMessage::new().content(format!("{sender_name}:")))
           .await?;
-        DB.put_msg_id_ir_2(&target_id, &receipt.id.0.get(), &message.id)?;
+        DB.put_msg_id_ir_2(&target_id, &receipt.id.get(), &message.id)?;
         let kind = infer::get_from_path(&path).expect("file read failed when refering file type");
 
         let filename = match kind {
@@ -169,14 +169,14 @@ async fn msg_handler(mut message: Message, target_id: u64, server: ArcStr) -> Re
         let receipt = target
           .send_message(&**BOT_CLIENT, CreateMessage::new().add_file(attachment))
           .await?;
-        DB.put_msg_id_1(&target_id, &message.id, &receipt.id.0.get())?;
+        DB.put_msg_id_1(&target_id, &message.id, &receipt.id.get())?;
       }
       MessageType::Sticker { id, url } => {
         let path = RES.file(&id, &url, room_id.clone(), &server).await?;
         let receipt = target
           .send_message(&**BOT_CLIENT, CreateMessage::new().content(format!("{sender_name}:")))
           .await?;
-        DB.put_msg_id_ir_2(&target_id, &receipt.id.0.get(), &message.id)?;
+        DB.put_msg_id_ir_2(&target_id, &receipt.id.get(), &message.id)?;
         let kind = infer::get_from_path(&path).expect("file read failed when refering file type");
 
         let filename = match kind {
@@ -188,7 +188,7 @@ async fn msg_handler(mut message: Message, target_id: u64, server: ArcStr) -> Re
         let receipt = target
           .send_message(&**BOT_CLIENT, CreateMessage::new().add_file(attachment))
           .await?;
-        DB.put_msg_id_1(&target_id, &message.id, &receipt.id.0.get())?;
+        DB.put_msg_id_1(&target_id, &message.id, &receipt.id.get())?;
       }
       _ => {}
     }
