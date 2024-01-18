@@ -5,6 +5,10 @@ on:
     branches: [ master ]
     paths-ignore: [ '*.md' ]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 env:
   SHORT_NAME: dc
   CRATE_NAME: msgist-dc
