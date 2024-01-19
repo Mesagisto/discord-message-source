@@ -1,6 +1,6 @@
 [package]
 name = "msgist-dc"
-version = "1.4.3"
+version = "1.4.4"
 
 authors = ["Itsusinn <itsusinn@foxmail.com>"]
 edition = "2021"
