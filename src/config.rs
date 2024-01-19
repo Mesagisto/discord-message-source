@@ -19,14 +19,14 @@ pub struct Config {
   pub discord: DiscordConfig,
   pub proxy: ProxyConfig,
   pub cipher: CipherConfig,
-  pub bindings: DashMap<u64, ArcStr>,
+  pub bindings: DashMap<String, ArcStr>,
   pub tls: TlsConfig,
   pub centers: Arc<DashMap<ArcStr, ArcStr>>,
 
 }
 impl Config {
   pub fn room_address(&self, target: &u64) -> Option<ArcStr> {
-    self.bindings.get(target).map(|v| v.clone())
+    self.bindings.get(&target.to_string()).map(|v| v.clone())
   }
 
   pub fn room_id(&self, target: u64) -> Option<Arc<Uuid>> {
@@ -42,7 +42,7 @@ impl Config {
       .iter()
       .filter_map(|v| {
         if v.value() == room_address {
-          Some(v.key().to_owned())
+          Some(v.key().parse::<u64>().expect("Key in config is not number!").to_owned())
         } else {
           None
         }

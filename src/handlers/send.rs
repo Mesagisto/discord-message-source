@@ -20,10 +20,10 @@ use crate::{
 
 pub async fn answer_common(msg: Message) -> Result<()> {
   let target = msg.channel_id.get();
-  if !CONFIG.bindings.contains_key(&target) {
+  if !CONFIG.bindings.contains_key(&target.to_string()) {
     return Ok(());
   }
-  let room_address = CONFIG.bindings.get(&target).unwrap().clone();
+  let room_address = CONFIG.bindings.get(&target.to_string()).unwrap().clone();
 
   let sender = &msg.author;
   let nick = msg.member.as_ref().and_then(|v| v.nick.clone());
