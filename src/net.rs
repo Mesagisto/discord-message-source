@@ -14,6 +14,7 @@ pub async fn build_http() -> serenity::http::Http {
       .expect("Failed to create reqwest::Client builder");
     HttpBuilder::new(CONFIG.discord.token.clone())
       .proxy(CONFIG.proxy.address.as_str())
+      .ratelimiter_disabled(true)
       .client(builder)
       .build()
   } else {
@@ -23,6 +24,7 @@ pub async fn build_http() -> serenity::http::Http {
       .build()
       .expect("Failed to create reqwest::Client builder");
     HttpBuilder::new(CONFIG.discord.token.clone())
+      .ratelimiter_disabled(true)
       .client(builder)
       .build()
   }
