@@ -1624,7 +1624,7 @@ dependencies = [
 
 [[package]]
 name = "msgist-dc"
-version = "1.4.4"
+version = "1.4.5"
 dependencies = [
  "arcstr",
  "base64-url 2.0.2",
